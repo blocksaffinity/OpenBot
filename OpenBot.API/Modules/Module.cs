@@ -2,7 +2,7 @@ using OpenBot.API.Enums;
 
 namespace OpenBot.API.Modules;
 
-public abstract class Module : IModule, IModuleLifecycle
+public abstract class Module : IModule
 {
     public string Name { get; }
     public ILogger Logger { get; }
@@ -17,18 +17,27 @@ public abstract class Module : IModule, IModuleLifecycle
         Logger = context.Logger;
     }
 
-    Task IModuleLifecycle.StartAsync()
+    internal async Task RegisterAsync()
     {
-        Status = ModuleStatus.Started;
-        return OnStartAsync();
-    }
-
-    Task IModuleLifecycle.StopAsync()
-    {
+        await OnRegisterAsync();
         Status = ModuleStatus.Registered;
-        return OnStopAsync();
+    }
+    internal async Task StartAsync()
+    {
+        await OnStartAsync();
+        Status = ModuleStatus.Started;
     }
 
+    internal async Task StopAsync()
+    {
+        await OnStopAsync();
+        Status = ModuleStatus.Registered;
+    }
+
+    protected virtual Task OnRegisterAsync()
+    {
+        return Task.CompletedTask;
+    }
     protected virtual Task OnStartAsync()
     {
         return Task.CompletedTask;

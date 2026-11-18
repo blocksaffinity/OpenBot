@@ -1,4 +1,3 @@
-using System.Numerics;
 using OpenBot.API.Enums;
 using OpenBot.API.Modules;
 
@@ -21,28 +20,28 @@ internal sealed class ModuleManager : IModuleProvider
     /// <typeparam name="T">The type of the desired module</typeparam>
     /// <param name="module">The module to register</param>
     /// <exception cref="InvalidOperationException"></exception>
-    internal void Register<T>(T module) where T : Module
+    internal async Task Register<T>(T module) where T : Module
     {
         if (module.Name.Length > 15)
         {
             throw new InvalidOperationException("Module/extension names cannot be longer than 15 characters!");
         }
 
-        if (modules.ContainsValue(module))
+        if (modules.ContainsKey(typeof(T)) || modules.ContainsValue(module))
         {
             this.logger.Warn($"{module.Name} is already registered, skipping...");
             return;
         }
 
         modules.Add(typeof(T), module);
-        
+        this.logger.Info($"Registered module {module.Name}");
+        await module.RegisterAsync();
 
         foreach (var type in module.GetType().GetInterfaces())
         {
             if (typeof(IModule).IsAssignableFrom(type))
             {
                 publicModules[type] = module;
-                this.logger.Info($"Registered module {module.Name}");
             }
         }
     }
@@ -52,29 +51,46 @@ internal sealed class ModuleManager : IModuleProvider
     /// </summary>
     internal async Task StartAllModulesAsync()
     {
-        foreach (IModule module in modules.Values)
+        foreach (Module module in modules.Values)
         {
-            if (((IModuleLifecycle)module).Status == ModuleStatus.Started)
+            if (module.Status == ModuleStatus.Started)
             {
                 this.logger.Warn($"{module.Name} is already started, skipping start...");
                 continue;
             }
-            await ((IModuleLifecycle)module).StartAsync();
-            this.logger.Info($"Started module {module.Name}");
+            try
+            {
+                await module.StartAsync();
+                this.logger.Info($"Started module {module.Name}");
+            }
+            catch (Exception ex)
+            {
+                this.logger.Error($"Failed to start module {module.Name}: {ex}");
+            }
         }
     }
 
+    /// <summary>
+    /// Stops all registered modules
+    /// </summary>
     internal async Task StopAllModulesAsync()
     {
-        foreach (IModule module in modules.Values.Reverse())
+        foreach (Module module in modules.Values.Reverse())
         {
-            if (((IModuleLifecycle)module).Status != ModuleStatus.Started)
+            if (module.Status != ModuleStatus.Started)
             {
                 this.logger.Warn($"{module.Name} is not started, skipping stop...");
                 continue;
             }
-            await ((IModuleLifecycle)module).StopAsync();
-            this.logger.Info($"Stoped module {module.Name}");
+            try
+            {
+                await module.StopAsync();
+                this.logger.Info($"Stoped module {module.Name}");
+            }
+            catch (Exception ex)
+            {
+                this.logger.Error($"Failed to stop module {module.Name}: {ex}");
+            }
         }
     }
 
@@ -83,11 +99,21 @@ internal sealed class ModuleManager : IModuleProvider
         return (T)modules[typeof(T)];
     }
 
+
+    /// <summary>
+    /// Retrieves the list of public modules
+    /// </summary>
+    /// <returns>List of public registered modules</returns>
     public IReadOnlyCollection<IModule> GetModules()
     {
         return publicModules.Values.Distinct().ToArray();
     }
 
+    /// <summary>
+    /// Retrieves a registered module of the provided type, or null if one is not loaded
+    /// </summary>
+    /// <typeparam name="T">The class, e.g. ConfigurationModule, of the target module (must inherit from IModule)</typeparam>
+    /// <returns>The requested module</returns>
     public T? Get<T>() where T : class, IModule
     {
         return publicModules.TryGetValue(typeof(T), out var module)

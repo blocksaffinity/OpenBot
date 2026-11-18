@@ -1,4 +1,3 @@
-using System.Reflection.PortableExecutable;
 using OpenBot.API;
 using OpenBot.API.Modules;
 
@@ -13,7 +12,7 @@ internal class Core : Module
         this.moduleManager = moduleManager;
     }
 
-    internal async Task StartAsync()
+    internal async Task RunAsync()
     {
         this.Logger.Debug("Starting bot...");
 
@@ -27,7 +26,7 @@ internal class Core : Module
             null
         );
         var configuration = new ConfigurationModule(configurationContext);
-        moduleManager.Register(configuration);
+        await moduleManager.Register(configuration);
 
         // #2 Authentication module
         var authenticationContext = new ModuleContext(
@@ -37,9 +36,8 @@ internal class Core : Module
             configuration
         );
         var authentication = new AuthenticationModule(authenticationContext);
-        moduleManager.Register(authentication);
+        await moduleManager.Register(authentication);
 
-        // FIXME: This registers twice??
         // #3 Discord module
         var discordContext = new ModuleContext(
             "Discord",
@@ -48,12 +46,9 @@ internal class Core : Module
             configuration
         );
         var discord = new DiscordModule(discordContext, authentication);
-        moduleManager.Register(discord);
+        await moduleManager.Register(discord);
 
         await moduleManager.StartAllModulesAsync();
-
-        // Connect to bot
-        await discord.StartAsync();
 
         // If there's no extensions loaded
         // TODO: implement this statement once extension manager is implemented
@@ -61,6 +56,7 @@ internal class Core : Module
 
         this.Logger.Debug("Waiting for eternity...");
 
+        // TODO: Implement a graceful shutdown
         await Task.Delay(Timeout.Infinite);
     }
 }

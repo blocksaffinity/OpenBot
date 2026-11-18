@@ -12,4 +12,4 @@ var coreContext = new ModuleContext(
 
 Core core = new(moduleManager, coreContext);
 
-await core.StartAsync();
+await core.RunAsync();
