@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="OpenBot.API/OpenBot.API.csproj" />
+  <Project Path="OpenBot/OpenBot.csproj" />
+</Solution>
