@@ -14,7 +14,7 @@ internal class Core : Module
 
     internal async Task RunAsync()
     {
-        this.Logger.Debug("Starting bot...");
+        this.Logger.Info("Hello and welcome to OpenBot!");
 
         this.Logger.Debug("Registering modules...");
 
@@ -48,7 +48,34 @@ internal class Core : Module
         var discord = new DiscordModule(discordContext, authentication);
         await moduleManager.Register(discord);
 
+        // #4 Extensions module
+        var extensionsContext = new ModuleContext(
+            "Extensions",
+            LoggingService.GetLogger("Extensions"),
+            moduleManager,
+            configuration
+        );
+        var extensions = new ExtensionsManagerModule(extensionsContext);
+        await moduleManager.Register(extensions);
+
         await moduleManager.StartAllModulesAsync();
+
+
+
+        string[] extensionPaths = extensions.Discover();
+
+        // Assembly loading stuff
+        foreach (string extensionPath in extensionPaths)
+        {
+            try
+            {
+                Type[] types = extensions.LoadExtensionTypes(extensionPath);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Failed to load extension {Path.GetFileName(extensionPath)}: {ex}");
+            }
+        }
 
         // If there's no extensions loaded
         // TODO: implement this statement once extension manager is implemented
