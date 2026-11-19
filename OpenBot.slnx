@@ -1,7 +1,4 @@
 <Solution>
-  <Folder Name="/OfficialExtensions/">
-    <Project Path="OfficialExtensions/Permissions/Permissions.csproj" />
-  </Folder>
   <Project Path="OpenBot.API/OpenBot.API.csproj" />
   <Project Path="OpenBot/OpenBot.csproj" />
 </Solution>
