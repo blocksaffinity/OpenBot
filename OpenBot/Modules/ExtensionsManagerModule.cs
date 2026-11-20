@@ -1,6 +1,8 @@
 using System.Runtime.Loader;
+using Newtonsoft.Json;
 using OpenBot.API;
 using OpenBot.API.Enums;
+using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
 using OpenBot.Utils;
 
@@ -13,6 +15,30 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
     {
     }
 
+    public ExtensionMetadata? GetExtensionMetadata(Extension extension)
+    {
+        return GetExtensionMetadata(extension.Name);
+    }
+
+    public ExtensionMetadata? GetExtensionMetadata(string extensionName)
+    {
+        try
+        {
+            // TODO: Definitely jank, urgent help needed
+            string json = File.ReadAllText(Path.Combine("..", "..", "..", "..", "Extensions", extensionName, "extension.json"));
+
+            ExtensionMetadata? extensionMetadata = JsonConvert.DeserializeObject<ExtensionMetadata>(json);
+
+            return extensionMetadata;
+        }
+        catch (Exception ex)
+        {
+            // Probably jank, possibly not
+            this.Logger.Warn($"Error getting extension metadata for {extensionName}: {ex}");
+            return null;
+        }
+    }
+
     private readonly string ExtensionsDirectory =
     //TODO: jank, MUST fix .. x4 it doesn't even work in my main terminal
         Path.GetFullPath(
@@ -23,18 +49,36 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
 
     internal async Task Register<T>(T extension) where T : Extension
     {
+        // Name length validation
         if (extension.Name.Length > 15)
         {
             throw new InvalidOperationException("Extension names cannot be longer than 15 characters!");
         }
 
-        if (extensions.ContainsKey(typeof(T)) || extensions.ContainsValue(extension))
+        // Name taken validation
+        if (extensions.ContainsKey(extension.GetType()) || extensions.ContainsValue(extension))
         {
             this.Logger.Warn($"Extension {extension.Name} is already registered, skipping...");
             return;
         }
+        
+        ExtensionMetadata? meta = GetExtensionMetadata(extension);
+        // Metadata validation
+        if (meta is null)
+        {
+            this.Logger.Warn($"Extension {extension.Name} does not appear to contain metadata at extension.json, skipping...");
+            return;
+        }
 
-        extensions.Add(typeof(T), extension);
+        // API version validation
+        if (meta.apiVersion != APIDetails.APIVersion)
+        {
+            this.Logger.Warn($"Extension {extension.Name} is compiled for a different API version than OpenBot, skipping...");
+            return;
+        }
+
+        // Now register the extension
+        extensions.Add(extension.GetType(), extension);
         this.Logger.Info($"Registered extension {extension.Name}");
         await extension.RegisterAsync();
     }
@@ -55,7 +99,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
             try
             {
                 await extension.StartAsync();
-                this.Logger.Info($"Started module {extension.Name}");
+                this.Logger.Info($"Started extension {extension.Name}");
             }
             catch (Exception ex)
             {

@@ -27,13 +27,13 @@ internal sealed class ModuleManager : IModuleManager
             throw new InvalidOperationException("Module names cannot be longer than 15 characters!");
         }
 
-        if (modules.ContainsKey(typeof(T)) || modules.ContainsValue(module))
+        if (modules.ContainsKey(module.GetType()) || modules.ContainsValue(module))
         {
             this.logger.Warn($"Module{module.Name} is already registered, skipping...");
             return;
         }
 
-        modules.Add(typeof(T), module);
+        modules.Add(module.GetType(), module);
         this.logger.Info($"Registered module {module.Name}");
         await module.RegisterAsync();
 

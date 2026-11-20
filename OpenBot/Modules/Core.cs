@@ -100,11 +100,20 @@ internal class Core : Module
             }
         }
 
+        await extensions.StartAllExtensionsAsync();
+
         // If there's no extensions loaded
         if (extensions.GetExtensionsCount() < 1)
         {
             this.Logger.Hint("No extensions are loaded! Make sure to add some to give your bot some functionality!");
         }
+
+
+        if (APIDetails.APIBetaVersion)
+        {
+            this.Logger.Warn("This version of the OpenBot API is a beta version. Expect bugs and instability.");
+        }
+
 
         this.Logger.Debug("Waiting for eternity...");
 

@@ -2,8 +2,8 @@ namespace OpenBot.API.Extensions;
 
 public sealed class ExtensionMetadata
 {
-    string name;
-    string file;
-    string version;
-    string apiVersion;
+    public string name;
+    public string file;
+    public string version;
+    public string apiVersion;
 }
