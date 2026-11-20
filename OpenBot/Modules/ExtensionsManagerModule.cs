@@ -71,7 +71,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
         }
 
         // API version validation
-        if (meta.apiVersion != APIDetails.APIVersion)
+        if (meta.apiVersion != APIDetails.ApiVersion)
         {
             this.Logger.Warn($"Extension {extension.Name} is compiled for a different API version than OpenBot, skipping...");
             return;

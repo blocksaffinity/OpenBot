@@ -109,7 +109,7 @@ internal class Core : Module
         }
 
 
-        if (APIDetails.APIBetaVersion)
+        if (APIDetails.ApiBetaVersion)
         {
             this.Logger.Warn("This version of the OpenBot API is a beta version. Expect bugs and instability.");
         }
