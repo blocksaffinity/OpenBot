@@ -1,6 +1,6 @@
 namespace OpenBot.API.Modules;
 
-public interface IModuleProvider
+public interface IModuleManager
 {
     IReadOnlyCollection<IModule> GetModules();
 

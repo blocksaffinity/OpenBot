@@ -3,7 +3,7 @@ using OpenBot.API.Modules;
 
 namespace OpenBot.Modules;
 
-internal sealed class ModuleManager : IModuleProvider
+internal sealed class ModuleManager : IModuleManager
 {
     private readonly Dictionary<Type, Module> modules = [];
     private readonly Dictionary<Type, IModule> publicModules = [];
@@ -24,12 +24,12 @@ internal sealed class ModuleManager : IModuleProvider
     {
         if (module.Name.Length > 15)
         {
-            throw new InvalidOperationException("Module/extension names cannot be longer than 15 characters!");
+            throw new InvalidOperationException("Module names cannot be longer than 15 characters!");
         }
 
         if (modules.ContainsKey(typeof(T)) || modules.ContainsValue(module))
         {
-            this.logger.Warn($"{module.Name} is already registered, skipping...");
+            this.logger.Warn($"Module{module.Name} is already registered, skipping...");
             return;
         }
 
@@ -55,7 +55,7 @@ internal sealed class ModuleManager : IModuleProvider
         {
             if (module.Status == ModuleStatus.Started)
             {
-                this.logger.Warn($"{module.Name} is already started, skipping start...");
+                this.logger.Warn($"Module {module.Name} is already started, skipping start...");
                 continue;
             }
             try
@@ -79,7 +79,7 @@ internal sealed class ModuleManager : IModuleProvider
         {
             if (module.Status != ModuleStatus.Started)
             {
-                this.logger.Warn($"{module.Name} is not started, skipping stop...");
+                this.logger.Warn($"Module {module.Name} is not started, skipping stop...");
                 continue;
             }
             try
@@ -110,7 +110,7 @@ internal sealed class ModuleManager : IModuleProvider
     }
 
     /// <summary>
-    /// Retrieves a registered module of the provided type, or null if one is not loaded
+    /// Retrieves a registered module of the provided type, or null if one is not registered
     /// </summary>
     /// <typeparam name="T">The class, e.g. ConfigurationModule, of the target module (must inherit from IModule)</typeparam>
     /// <returns>The requested module</returns>

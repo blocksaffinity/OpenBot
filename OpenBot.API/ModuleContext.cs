@@ -7,8 +7,8 @@ public class ModuleContext
 {
     public string Name { get; }
     public ILogger Logger { get; }
-    public IModuleProvider Modules { get; }
-    public IConfigurationProvider? Configuration { get; }
+    public IModuleManager Modules { get; }
+    public IConfigurationModule? Configuration { get; }
     public ModuleStatus? GetStatus(string moduleName)
     {
         foreach (Module module in Modules.GetModules().Cast<Module>())
@@ -24,8 +24,8 @@ public class ModuleContext
     public ModuleContext(
         string name,
         ILogger logger,
-        IModuleProvider modules,
-        IConfigurationProvider? configuration)
+        IModuleManager modules,
+        IConfigurationModule? configuration)
     {
         Name = name;
         Logger = logger;

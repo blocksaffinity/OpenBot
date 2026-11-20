@@ -7,7 +7,7 @@ using OpenBot.Exceptions;
 
 namespace OpenBot.Modules;
 
-internal sealed class ConfigurationModule : Module, IConfigurationProvider
+internal sealed class ConfigurationModule : Module, IConfigurationModule
 {
     private readonly Dictionary<string, object> configurationCache = [];
     private readonly ISerializer serializer;

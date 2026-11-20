@@ -1,6 +1,6 @@
 namespace OpenBot.API.Modules;
 
-public interface IConfigurationProvider
+public interface IConfigurationModule
 {
     T GetConfig<T>(string moduleName) where T : class, new();
 

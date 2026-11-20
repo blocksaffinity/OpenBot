@@ -67,19 +67,44 @@ internal class Core : Module
         // Assembly loading stuff
         foreach (string extensionPath in extensionPaths)
         {
+            string extensionName = Path.GetFileName(Path.GetDirectoryName(extensionPath)) ?? string.Empty;
             try
             {
                 Type[] types = extensions.LoadExtensionTypes(extensionPath);
+                Extension? extension = null;
+                foreach (Type type in types)
+                {
+                    // (Parameter names are not accurate)
+                    // ExtensionContext(string name, ILogger logger, IModuleManager modMan, IConfigurationModule conf)
+                    ExtensionContext extensionContext = new(
+                        extensionName,
+                        LoggingService.GetLogger(extensionName),
+                        moduleManager,
+                        configuration
+                    );
+                    object? instance = Activator.CreateInstance(type, extensionContext);
+
+                    if (instance is Extension validExtension)
+                    {
+                        extension = validExtension;
+                    }
+                }
+                if (extension is not null)
+                {
+                    await extensions.Register(extension);
+                }
             }
             catch (Exception ex)
             {
-                Logger.Warn($"Failed to load extension {Path.GetFileName(extensionPath)}: {ex}");
+                Logger.Warn($"Failed to load extension {extensionName}: {ex}");
             }
         }
 
         // If there's no extensions loaded
-        // TODO: implement this statement once extension manager is implemented
-        this.Logger.Hint("No extensions are loaded! Make sure to add some to give your bot some functionality!");
+        if (extensions.GetExtensionsCount() < 1)
+        {
+            this.Logger.Hint("No extensions are loaded! Make sure to add some to give your bot some functionality!");
+        }
 
         this.Logger.Debug("Waiting for eternity...");
 
