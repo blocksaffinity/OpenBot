@@ -11,12 +11,7 @@ internal class AuthenticationModule : PrivateModule
 
     internal string GetToken()
     {
-        AuthenticationConfig? config = this.GetConfig<AuthenticationConfig>();
-
-        if (config is null)
-        {
-            throw new InvalidOperationException("Authentication module configuration is unreachable: check /ModuleConfig/Authentication/config.yml!");
-        }
+        AuthenticationConfig config = this.GetConfig<AuthenticationConfig>();
 
         string token = config.BotToken;
 

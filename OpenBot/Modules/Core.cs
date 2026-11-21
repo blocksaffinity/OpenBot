@@ -21,6 +21,7 @@ internal class Core : Module
 
         this.Logger.Debug("Registering modules...");
 
+
         // #1 Configuration module
         var configurationContext = new ModuleContext(
             "Configuration",
@@ -30,6 +31,7 @@ internal class Core : Module
         );
         var configuration = new ConfigurationModule(configurationContext);
         await moduleManager.Register(configuration);
+
 
         // #2 Authentication module
         var authenticationContext = new ModuleContext(
@@ -41,6 +43,7 @@ internal class Core : Module
         var authentication = new AuthenticationModule(authenticationContext);
         await moduleManager.Register(authentication);
 
+
         // #3 Discord module
         var discordContext = new ModuleContext(
             "Discord",
@@ -50,6 +53,7 @@ internal class Core : Module
         );
         var discord = new DiscordModule(discordContext, authentication);
         await moduleManager.Register(discord);
+
 
         // #4 Extensions module
         var extensionsContext = new ModuleContext(
@@ -79,10 +83,13 @@ internal class Core : Module
             if (string.IsNullOrWhiteSpace(extensionName))
             {
                 this.Logger.Warn($"Skipped loading (unknown extension): extension.json does not contain 'name'.");
+                continue;
             }
             try
             {
-                Type[] types = extensions.LoadExtensionTypes(extensionMeta.file ?? $"{extensionName}.dll");
+                string dllFile = extensionMeta.file ?? $"{extensionName}.dll";
+                string dllPath = Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions", extensionName, dllFile);
+                Type[] types = extensions.LoadExtensionTypes(dllPath: dllPath);
                 Extension? extension = null;
                 Logger logger = LoggingService.GetLogger(extensionName);
 
@@ -105,7 +112,7 @@ internal class Core : Module
                 }
                 if (extension is not null)
                 {
-                    await extensions.Register(extension);
+                    await extensions.Register(extension, extensionMeta);
                 }
             }
             catch (Exception ex)

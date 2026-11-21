@@ -39,7 +39,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
 
     private readonly string ExtensionsDirectory = Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions");
 
-    internal async Task Register<T>(T extension) where T : Extension
+    internal async Task Register<T>(T extension, ExtensionMetadata metadata) where T : Extension
     {
         // Name length validation
         if (extension.Name.Length > 15)
@@ -53,17 +53,9 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
             this.Logger.Warn($"Extension {extension.Name} is already registered, skipping...");
             return;
         }
-        
-        ExtensionMetadata? meta = GetExtensionMetadata(extension);
-        // Metadata validation
-        if (meta is null)
-        {
-            this.Logger.Warn($"Extension {extension.Name} does not appear to contain metadata at extension.json, skipping...");
-            return;
-        }
 
         // API version validation
-        if (meta.apiVersion != APIDetails.ApiVersion)
+        if (metadata.apiVersion != APIDetails.ApiVersion)
         {
             this.Logger.Warn($"Extension {extension.Name} is compiled for a different API version than OpenBot, skipping...");
             return;
@@ -185,11 +177,10 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
             try
             {
                 // Here, directory = "Extensions/possibleExtensionName"
+                string extensionName = Path.GetFileName(directory);
 
                 string requiredExtensionMetadataPath = Path.Combine(directory, "extension.json");
-                ExtensionMetadata? meta = GetExtensionMetadata(requiredExtensionMetadataPath);
-
-                string extensionName = Path.GetFileName(directory);
+                ExtensionMetadata? meta = GetExtensionMetadata(extensionName);
 
                 if (meta is null)
                 {
@@ -200,6 +191,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
                 string requiredExtensionDllPath = Path.Combine(directory, meta.file ?? $"{extensionName}.dll");
                 if (File.Exists(requiredExtensionDllPath))
                 {
+                    metas.Add(meta);
                     metaFiles.Add(requiredExtensionMetadataPath);
                     dllFiles.Add(requiredExtensionDllPath);
                 }

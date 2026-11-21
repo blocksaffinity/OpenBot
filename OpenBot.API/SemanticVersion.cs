@@ -1,5 +1,8 @@
+using Newtonsoft.Json;
+
 namespace OpenBot.API;
 
+[JsonConverter(typeof(SemanticVersionJsonConverter))]
 public sealed class SemanticVersion
 {
     /// <summary>
@@ -59,5 +62,53 @@ public sealed class SemanticVersion
         {
             Label = split[3];
         }
+    }
+}
+
+public sealed class SemanticVersionJsonConverter : JsonConverter<SemanticVersion>
+{
+    public override SemanticVersion? ReadJson(
+        JsonReader reader,
+        Type objectType,
+        SemanticVersion? existingValue,
+        bool hasExistingValue,
+        JsonSerializer serializer)
+    {
+        if (reader.TokenType == JsonToken.Null)
+        {
+            return null;
+        }
+
+        if (reader.TokenType != JsonToken.String || reader.Value is not string version)
+        {
+            throw new JsonSerializationException("SemanticVersion must be represented by a JSON string.");
+        }
+
+        try
+        {
+            return new SemanticVersion(version);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new JsonSerializationException($"Invalid SemanticVersion value: {version}", ex);
+        }
+        catch (OverflowException ex)
+        {
+            throw new JsonSerializationException($"Invalid SemanticVersion value: {version}", ex);
+        }
+    }
+
+    public override void WriteJson(JsonWriter writer, SemanticVersion? value, JsonSerializer serializer)
+    {
+        if (value is null)
+        {
+            writer.WriteNull();
+            return;
+        }
+
+        string label = string.IsNullOrEmpty(value.Label) || value.Label.StartsWith('-')
+            ? value.Label
+            : $"-{value.Label}";
+        writer.WriteValue($"{value.Major}.{value.Minor}.{value.Patch}{label}");
     }
 }
