@@ -65,6 +65,18 @@ internal class Core : Module
         var extensions = new ExtensionsManagerModule(extensionsContext);
         await moduleManager.Register(extensions);
 
+
+        // #5 ConsoleCommandHandler module
+        var cchContext = new ModuleContext(
+            "CCommandHandler",
+            LoggingService.GetLogger("CCommandHandler"),
+            moduleManager,
+            configuration
+        );
+        var cch = new ConsoleCommandHandlerModule(cchContext);
+        await moduleManager.Register(cch);
+
+
         await moduleManager.StartAllModulesAsync();
 
         ExtensionMetadata[] extensionMetas = extensions.DiscoverExtensions();
@@ -136,9 +148,11 @@ internal class Core : Module
         }
 
 
-        this.Logger.Debug("Waiting for eternity...");
+        //this.Logger.Debug("Waiting for eternity...");
 
         // TODO: Implement a graceful shutdown
-        await Task.Delay(Timeout.Infinite);
+        //await Task.Delay(Timeout.Infinite);
+
+        await cch.CommandHandlerLoop();
     }
 }

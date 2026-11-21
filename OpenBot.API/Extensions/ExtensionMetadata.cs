@@ -4,6 +4,6 @@ public sealed class ExtensionMetadata
 {
     public string? name;
     public string? file;
-    public SemanticVersion? version;
-    public SemanticVersion? apiVersion;
+    public string? version;
+    public string? apiVersion;
 }

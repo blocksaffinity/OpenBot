@@ -8,7 +8,7 @@ using OpenBot.Utils;
 
 namespace OpenBot.Modules;
 
-internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
+internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
 {
     private Dictionary<Type, Extension> extensions = [];
     internal ExtensionsManagerModule(ModuleContext context) : base(context)
@@ -55,7 +55,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
         }
 
         // API version validation
-        if (metadata.apiVersion != APIDetails.ApiVersion)
+        if (metadata.apiVersion != APIDetails.ApiVersion.ToString())
         {
             this.Logger.Warn($"Extension {extension.Name} is compiled for a different API version than OpenBot, skipping...");
             return;

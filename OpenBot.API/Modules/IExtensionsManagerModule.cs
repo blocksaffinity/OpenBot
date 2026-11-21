@@ -2,7 +2,7 @@ using OpenBot.API.Extensions;
 
 namespace OpenBot.API.Modules;
 
-public interface IExtensionManagerModule
+public interface IExtensionsManagerModule : IModule
 {
     /// <summary>
     /// Returns the ExtensionMetadata for the given Extension, or null if not found
