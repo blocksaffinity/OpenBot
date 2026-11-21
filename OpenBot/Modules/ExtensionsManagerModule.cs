@@ -24,8 +24,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
     {
         try
         {
-            // TODO: Definitely jank, urgent help needed
-            string json = File.ReadAllText(Path.Combine("..", "..", "..", "..", "Extensions", extensionName, "extension.json"));
+            string json = File.ReadAllText(Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions", extensionName, "extension.json"));
 
             ExtensionMetadata? extensionMetadata = JsonConvert.DeserializeObject<ExtensionMetadata>(json);
 
@@ -33,19 +32,12 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
         }
         catch (Exception ex)
         {
-            // Probably jank, possibly not
             this.Logger.Warn($"Error getting extension metadata for {extensionName}: {ex}");
-            return null;
+            throw new InvalidOperationException($"Failed to get extension metadata for {extensionName}");
         }
     }
 
-    private readonly string ExtensionsDirectory =
-    //TODO: jank, MUST fix .. x4 it doesn't even work in my main terminal
-        Path.GetFullPath(
-            Path.Combine(
-                AppContext.BaseDirectory, "..", "..", "..", "..", "Extensions"
-            )
-        );
+    private readonly string ExtensionsDirectory = Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions");
 
     internal async Task Register<T>(T extension) where T : Extension
     {
@@ -172,7 +164,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
         return extensions.Count;
     }
 
-    internal string[] Discover()
+    internal ExtensionMetadata[] DiscoverExtensions()
     {
         this.Logger.Debug($"Discovering extensions at {ExtensionsDirectory}...");
 
@@ -184,28 +176,45 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionManagerModule
             SearchOption.TopDirectoryOnly
         );
 
-        List<string> files = [];
+        List<string> metaFiles = [];
+        List<string> dllFiles = [];
+        List<ExtensionMetadata> metas = [];
 
         foreach (string directory in directories)
         {
-            // Here, directory = "Extensions/possibleExtensionName"
-            string extensionName = Path.GetFileName(directory);
-
-            string requriedExtensionDllPath =
-                Path.Combine(directory, $"{extensionName}.dll");
-
-            if (File.Exists(requriedExtensionDllPath))
+            try
             {
-                this.Logger.Debug($"Discovered {extensionName}.dll");
-                files.Add(requriedExtensionDllPath);
+                // Here, directory = "Extensions/possibleExtensionName"
+
+                string requiredExtensionMetadataPath = Path.Combine(directory, "extension.json");
+                ExtensionMetadata? meta = GetExtensionMetadata(requiredExtensionMetadataPath);
+
+                string extensionName = Path.GetFileName(directory);
+
+                if (meta is null)
+                {
+                    this.Logger.Warn($"Could not get metadata for extension {extensionName}, skipping...");
+                    continue;
+                }
+
+                string requiredExtensionDllPath = Path.Combine(directory, meta.file ?? $"{extensionName}.dll");
+                if (File.Exists(requiredExtensionDllPath))
+                {
+                    metaFiles.Add(requiredExtensionMetadataPath);
+                    dllFiles.Add(requiredExtensionDllPath);
+                }
+                else
+                {
+                    this.Logger.Warn($"Skipping loading extension {extensionName}: The extension directory does not contain {meta.file}.dll");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                this.Logger.Warn($"Skipping loading extension {extensionName}: The extension directory does not contain {extensionName}.dll");
+                this.Logger.Warn($"Error loading extension: {ex}");
             }
         }
 
-        return files.ToArray();
+        return metas.ToArray();
     }
 
     internal Type[] LoadExtensionTypes(string dllPath)

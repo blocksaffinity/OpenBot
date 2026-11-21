@@ -3,6 +3,6 @@ namespace OpenBot.API;
 // Jank?? Sure hope not
 public static class APIDetails
 {
-    public const string ApiVersion = "0.1.0-beta";
-    public readonly static bool ApiBetaVersion = ApiVersion.Contains("-beta");
+    public readonly static SemanticVersion ApiVersion = new(0, 1, 0, "-beta");
+    public readonly static bool ApiPreReleaseVersion = ApiVersion.Label.Contains("beta") || ApiVersion.Label.Contains("alpha");
 }

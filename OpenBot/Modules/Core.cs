@@ -1,4 +1,5 @@
 using OpenBot.API;
+using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
 
 namespace OpenBot.Modules;
@@ -15,6 +16,8 @@ internal class Core : Module
     internal async Task RunAsync()
     {
         this.Logger.Info("Hello and welcome to OpenBot!");
+
+        this.Logger.Hint($"OpenBot directory: {API.OpenBot.GetRootDirectory()}");
 
         this.Logger.Debug("Registering modules...");
 
@@ -60,27 +63,38 @@ internal class Core : Module
 
         await moduleManager.StartAllModulesAsync();
 
-
-
-        string[] extensionPaths = extensions.Discover();
+        ExtensionMetadata[] extensionMetas = extensions.DiscoverExtensions();
 
         // Assembly loading stuff
-        foreach (string extensionPath in extensionPaths)
+        foreach (ExtensionMetadata extensionMeta in extensionMetas)
         {
-            string extensionName = Path.GetFileName(Path.GetDirectoryName(extensionPath)) ?? string.Empty;
+            if (extensionMeta is null)
+            {
+                // A log message has already been written
+                // Just skip this extension
+                continue;
+            }
+
+            string extensionName = extensionMeta.name ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(extensionName))
+            {
+                this.Logger.Warn($"Skipped loading (unknown extension): extension.json does not contain 'name'.");
+            }
             try
             {
-                Type[] types = extensions.LoadExtensionTypes(extensionPath);
+                Type[] types = extensions.LoadExtensionTypes(extensionMeta.file ?? $"{extensionName}.dll");
                 Extension? extension = null;
+                Logger logger = LoggingService.GetLogger(extensionName);
+
+
                 foreach (Type type in types)
                 {
-                    // (Parameter names are not accurate)
-                    // ExtensionContext(string name, ILogger logger, IModuleManager modMan, IConfigurationModule conf)
                     ExtensionContext extensionContext = new(
-                        extensionName,
-                        LoggingService.GetLogger(extensionName),
-                        moduleManager,
-                        configuration
+                        name                 : extensionName,
+                        logger               : logger,
+                        modules              : moduleManager,
+                        configurationProvider: configuration,
+                        meta                 : extensionMeta
                     );
                     object? instance = Activator.CreateInstance(type, extensionContext);
 
@@ -109,7 +123,7 @@ internal class Core : Module
         }
 
 
-        if (APIDetails.ApiBetaVersion)
+        if (APIDetails.ApiPreReleaseVersion)
         {
             this.Logger.Warn("This version of the OpenBot API is a beta version. Expect bugs and instability.");
         }

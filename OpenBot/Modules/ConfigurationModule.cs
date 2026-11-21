@@ -27,8 +27,7 @@ internal sealed class ConfigurationModule : Module, IConfigurationModule
     /// <returns>The full path to the configuration file for the module</returns>
     private string GetConfigPath(string moduleName)
     {
-        // TODO: this ".." x3 is jank, fix it
-        string botRootPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..");
+        string botRootPath = API.OpenBot.GetRootDirectory();
 
         // FIXME: for some reason, GetModules returns a list of extensions? maybe? maybe not???
         bool isExtension = this.Context.Modules.GetModules().Any(

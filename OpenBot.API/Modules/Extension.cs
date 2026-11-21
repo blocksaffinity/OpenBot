@@ -1,4 +1,5 @@
 using OpenBot.API.Enums;
+using OpenBot.API.Extensions;
 
 namespace OpenBot.API.Modules;
 
@@ -27,11 +28,14 @@ public abstract class Extension
     /// </summary>
     public ExtensionStatus Status  { get; private set; } = ExtensionStatus.Unregistered;
 
+    public ExtensionMetadata Metadata { get; }
+
     protected Extension(ExtensionContext context)
     {
         Context = context;
         Name = context.Name;
         Logger = context.Logger;
+        Metadata = context.Metadata;
     }
 
     internal async Task RegisterAsync()

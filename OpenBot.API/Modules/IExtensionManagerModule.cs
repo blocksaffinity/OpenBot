@@ -5,12 +5,12 @@ namespace OpenBot.API.Modules;
 public interface IExtensionManagerModule
 {
     /// <summary>
-    /// Returns the ExtensionMetadata for the given Extension, or null if not found or an error occurred
+    /// Returns the ExtensionMetadata for the given Extension, or null if not found
     /// </summary>
     ExtensionMetadata? GetExtensionMetadata(Extension extension);
 
     /// <summary>
-    /// Returns the ExtensionMetadata for the given extension name, or null if not found or an error occurred
+    /// Returns the ExtensionMetadata for the given extension name, or null if not found
     /// </summary>
     ExtensionMetadata? GetExtensionMetadata(string extensionName);
 

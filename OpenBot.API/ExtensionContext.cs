@@ -1,3 +1,4 @@
+using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
 
 namespace OpenBot.API;
@@ -7,11 +8,13 @@ namespace OpenBot.API;
 /// </summary>
 public sealed class ExtensionContext : ModuleContext
 {
+    public ExtensionMetadata Metadata { get; }
     public ExtensionContext(
         string name,
         ILogger logger,
         IModuleManager modules,
-        IConfigurationModule configurationProvider
+        IConfigurationModule configurationProvider,
+        ExtensionMetadata meta
     )
             : 
     base(
@@ -20,7 +23,8 @@ public sealed class ExtensionContext : ModuleContext
         modules,
         configurationProvider
     )
-    
+
     {
+        Metadata = meta;
     }
 }

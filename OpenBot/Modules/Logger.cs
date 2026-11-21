@@ -8,9 +8,8 @@ internal static class LoggingService
 {
     internal static readonly DateTime StartTime = DateTime.Now;
 
-    // TODO: This is jank and unreliable, fix it
     internal static readonly string LogFilePath =
-        Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "logs", $"{StartTime:yyyy-MM-dd_HH-mm-ss}.log");
+        Path.Combine(API.OpenBot.GetRootDirectory(), "logs", $"{StartTime:yyyy-MM-dd_HH-mm-ss}.log");
 
     internal static readonly ConcurrentDictionary<string, Logger> Loggers = [];
 
