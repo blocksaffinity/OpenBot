@@ -89,9 +89,14 @@ internal sealed class ConsoleCommandHandlerModule : Module
 
             // Handle your OpenBot commands here
             //Console.WriteLine($"[Command] Running: {consoleInput}");
-            if (consoleInput == "extensions")
+            if (consoleInput == "list extensions")
             {
-                Context.Modules.Get<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.Write(ext.Name + " " + ext.Metadata.apiVersion?.ToString() + ", "));
+                Context.Modules.Get<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.WriteLine(ext.Name + " " + ext.Metadata.apiVersion?.ToString() + ", "));
+                Console.WriteLine("");
+            }
+            else if (consoleInput == "list modules")
+            {
+                Context.Modules.GetModules().ToList().ForEach(mod => Console.WriteLine(mod.Name + ", "));
                 Console.WriteLine("");
             }
             else
