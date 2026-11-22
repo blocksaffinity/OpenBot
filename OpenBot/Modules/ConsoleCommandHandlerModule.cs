@@ -89,14 +89,24 @@ internal sealed class ConsoleCommandHandlerModule : Module
 
             // Handle your OpenBot commands here
             //Console.WriteLine($"[Command] Running: {consoleInput}");
-            if (consoleInput == "list extensions")
+            if (consoleInput == "help")
             {
-                Context.Modules.Get<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.WriteLine(ext.Name + " " + ext.Metadata.apiVersion?.ToString() + ", "));
+                Console.Write(
+"\nOpenBot Console Commands:\n" + 
+"   - help            -> Display this help menu\n" +
+"   - list modules    -> Lists all registered modules\n" +
+"   - list extensions -> Lists all registered extensions\n" +
+"   - stop            -> Shut down OpenBot\n\n"
+                );
+            }
+            else if (consoleInput == "list extensions")
+            {
+                Context.Modules.Get<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.WriteLine($"{ext.Name,-15} [Version: {ext.Metadata.version}] [API Version: {ext.Metadata.apiVersion}] [Status: {ext.Status}]"));
                 Console.WriteLine("");
             }
             else if (consoleInput == "list modules")
             {
-                Context.Modules.GetModules().ToList().ForEach(mod => Console.WriteLine(mod.Name + ", "));
+                Context.Modules.GetModules().ToList().ForEach(mod => Console.WriteLine($"{mod.Name,-15} [Status: {mod.Status}]"));
                 Console.WriteLine("");
             }
             else if (consoleInput == "stop")

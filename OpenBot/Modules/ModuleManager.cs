@@ -85,7 +85,7 @@ internal sealed class ModuleManager : IModuleManager
             try
             {
                 await module.StopAsync();
-                this.logger.Info($"Stoped module {module.Name}");
+                this.logger.Info($"Stopped module {module.Name}");
             }
             catch (Exception ex)
             {

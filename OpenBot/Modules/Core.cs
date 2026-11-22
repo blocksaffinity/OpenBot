@@ -148,11 +148,11 @@ internal class Core : Module
         }
 
 
-        //this.Logger.Debug("Waiting for eternity...");
-
         // TODO: Implement a graceful shutdown
         //await Task.Delay(Timeout.Infinite);
 
         await cch.CommandHandlerLoop(extMan: extensions, modMan: moduleManager);
+
+        this.Logger.Info("Goodbye, thanks for using OpenBot!");
     }
 }

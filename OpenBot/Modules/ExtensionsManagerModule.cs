@@ -108,7 +108,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
             try
             {
                 await extension.StopAsync();
-                this.Logger.Info($"Stoped extension {extension.Name}");
+                this.Logger.Info($"Stopped extension {extension.Name}");
             }
             catch (Exception ex)
             {
@@ -197,7 +197,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
                 }
                 else
                 {
-                    this.Logger.Warn($"Skipping loading extension {extensionName}: The extension directory does not contain {meta.file}.dll");
+                    this.Logger.Warn($"Skipping loading extension {extensionName}: The extension directory does not contain {meta.file}");
                 }
             }
             catch (Exception ex)
