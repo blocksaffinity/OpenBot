@@ -25,12 +25,7 @@ internal sealed class DiscordModule : Module, IDiscordModule
             GatewayIntents = config.GatewayIntents
         });
 
-        // Client log event(?)
-        Client.Log += log =>
-        {
-            Logger.Info(log.ToString());
-            return Task.CompletedTask;
-        };
+        Client.Log += LogAsync;
 
         // Client ready event
         Client.Ready += () =>
@@ -54,5 +49,39 @@ internal sealed class DiscordModule : Module, IDiscordModule
 
         await Client.LoginAsync(TokenType.Bot, token);
         await Client.StartAsync();
+    }
+
+    protected override async Task OnStopAsync()
+    {
+        this.Logger.Info("Disconnecting client...");
+        await Client.StopAsync();
+        await Client.LogoutAsync();
+    }
+
+    private Task LogAsync(LogMessage msg)
+    {
+        switch (msg.Severity)
+        {
+            case LogSeverity.Debug or LogSeverity.Verbose:
+                this.Logger.Debug(msg.Message);
+                break;
+            
+            case LogSeverity.Info:
+                this.Logger.Info(msg.Message);
+                break;
+
+            case LogSeverity.Warning:
+                this.Logger.Warn(msg.Message);
+                break;
+            
+            case LogSeverity.Error:
+                this.Logger.Error(msg.Message);
+                break;
+            
+            case LogSeverity.Critical:
+                this.Logger.Fatal(msg.Message);
+                break;
+        }
+        return Task.CompletedTask;
     }
 }

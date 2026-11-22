@@ -63,7 +63,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
 
         // Now register the extension
         extensions.Add(extension.GetType(), extension);
-        this.Logger.Info($"Registered extension {extension.Name}");
+        //this.Logger.Info($"Registered extension {extension.Name}");
         await extension.RegisterAsync();
     }
 

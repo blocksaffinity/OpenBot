@@ -1,3 +1,5 @@
+using Discord;
+
 namespace OpenBot.API.Modules;
 
 public interface ILogger

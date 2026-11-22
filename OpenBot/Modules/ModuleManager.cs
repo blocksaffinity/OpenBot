@@ -34,7 +34,7 @@ internal sealed class ModuleManager : IModuleManager
         }
 
         modules.Add(module.GetType(), module);
-        this.logger.Info($"Registered module {module.Name}");
+        //this.logger.Info($"Registered module {module.Name}");
         await module.RegisterAsync();
 
         foreach (var type in module.GetType().GetInterfaces())
