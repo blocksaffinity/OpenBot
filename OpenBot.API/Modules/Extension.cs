@@ -58,7 +58,6 @@ public abstract class Extension
     /// <summary>
     /// Called upon the registration of the extension
     /// </summary>
-    /// <returns></returns>
     protected virtual Task OnRegisterAsync()
     {
         return Task.CompletedTask;
@@ -67,7 +66,6 @@ public abstract class Extension
     /// <summary>
     /// Called upon the start of the extension
     /// </summary>
-    /// <returns></returns>
     protected virtual Task OnStartAsync()
     {
         return Task.CompletedTask;
@@ -76,7 +74,6 @@ public abstract class Extension
     /// <summary>
     /// Called upon the shutdown/stop of the extension
     /// </summary>
-    /// <returns></returns>
     protected virtual Task OnStopAsync()
     {
         return Task.CompletedTask;
