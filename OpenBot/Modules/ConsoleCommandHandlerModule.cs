@@ -94,7 +94,7 @@ internal sealed class ConsoleCommandHandlerModule : Module
             {
                 Console.Write(
 "\nOpenBot Console Commands:\n" + 
-"   - help            -> Display this help menu\n" +
+"   - help            -> Displays this help menu\n" +
 "   - list modules    -> Lists all registered modules\n" +
 "   - list extensions -> Lists all registered extensions\n" +
 "   - stop            -> Shut down OpenBot\n\n"
