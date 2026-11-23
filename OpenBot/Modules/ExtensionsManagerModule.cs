@@ -15,27 +15,6 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
     {
     }
 
-    public ExtensionMetadata? GetExtensionMetadata(Extension extension)
-    {
-        return GetExtensionMetadata(extension.Name);
-    }
-
-    public ExtensionMetadata? GetExtensionMetadata(string extensionName)
-    {
-        try
-        {
-            string json = File.ReadAllText(Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions", extensionName, "extension.json"));
-
-            ExtensionMetadata? extensionMetadata = JsonConvert.DeserializeObject<ExtensionMetadata>(json);
-
-            return extensionMetadata;
-        }
-        catch (Exception ex)
-        {
-            this.Logger.Warn($"Error getting extension metadata for {extensionName}: {ex}");
-            throw new InvalidOperationException($"Failed to get extension metadata for {extensionName}");
-        }
-    }
 
     private readonly string ExtensionsDirectory = Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions");
 
@@ -117,45 +96,6 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
         }
     }
 
-    public T? Get<T>() where T : Extension
-    {
-        return extensions.TryGetValue(typeof(T), out var module)
-            ? module as T
-            : null;
-    }
-
-    public Extension? Get(string name)
-    {
-        Extension[] matchedExtensions = 
-            (
-                from Extension extension in extensions.Values
-                where extension.Name == name
-                select extension
-            ).ToArray();
-
-        if (matchedExtensions.Length == 1)
-        {
-            return matchedExtensions[0];
-        }
-        else if (matchedExtensions.Length > 1)
-        {
-            this.Logger.Error($"Multiple extensions are registered with a name of '{name}'");
-            throw new InvalidOperationException($"There are multiple registered extensions of name '{name}'");
-        }
-
-        return null;
-    }
-
-    public IReadOnlyCollection<Extension> GetExtensions()
-    {
-        return extensions.Values;
-    }
-
-    public int GetExtensionsCount()
-    {
-        return extensions.Count;
-    }
-
     internal ExtensionMetadata[] DiscoverExtensions()
     {
         this.Logger.Debug($"Discovering extensions at {ExtensionsDirectory}...");
@@ -223,5 +163,91 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
             select type;
 
         return filteredTypes.ToArray();
+    }
+
+
+
+
+
+
+
+
+
+    // == API Exposed Methods ==
+    public ExtensionMetadata? GetExtensionMetadata(Extension extension)
+    {
+        return GetExtensionMetadata(extension.Name);
+    }
+
+    public ExtensionMetadata? GetExtensionMetadata(string extensionName)
+    {
+        try
+        {
+            string json = File.ReadAllText(Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions", extensionName, "extension.json"));
+
+            ExtensionMetadata? extensionMetadata = JsonConvert.DeserializeObject<ExtensionMetadata>(json);
+
+            return extensionMetadata;
+        }
+        catch (Exception ex)
+        {
+            this.Logger.Warn($"Error getting extension metadata for {extensionName}: {ex}");
+            throw new InvalidOperationException($"Failed to get extension metadata for {extensionName}");
+        }
+    }
+
+    public IReadOnlyCollection<Extension> GetExtensions()
+    {
+        return extensions.Values;
+    }
+
+    public int GetExtensionsCount()
+    {
+        return extensions.Count;
+    }
+
+    public Extension? GetOrNull(string name)
+    {
+        Extension[] matchedExtensions = 
+            (
+                from Extension extension in extensions.Values
+                where extension.Name == name
+                select extension
+            ).ToArray();
+
+        if (matchedExtensions.Length == 1)
+        {
+            return matchedExtensions[0];
+        }
+        else if (matchedExtensions.Length > 1)
+        {
+            this.Logger.Error($"Multiple extensions are registered with a name of '{name}'");
+            throw new InvalidOperationException($"There are multiple registered extensions of name '{name}'");
+        }
+
+        return null;
+    }
+
+    public T? GetOrNull<T>() where T : Extension
+    {
+        return extensions.TryGetValue(typeof(T), out var extension)
+            ? extension as T
+            : null;
+    }
+
+    public T GetOrThrow<T>() where T : Extension
+    {
+        extensions.TryGetValue(typeof(T), out var extension);
+        return extension as T ?? throw new InvalidOperationException("Failed to retrieve extension.");
+    }
+
+    public bool IsRegistered<T>() where T : Extension
+    {
+        return extensions.ContainsKey(typeof(T));
+    }
+
+    public bool IsStarted<T>() where T : Extension
+    {
+        return extensions.ContainsKey(typeof(T)) && extensions[typeof(T)].Status == ExtensionStatus.Started;
     }
 }

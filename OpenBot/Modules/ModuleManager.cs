@@ -100,24 +100,67 @@ internal sealed class ModuleManager : IModuleManager
     }
 
 
-    /// <summary>
-    /// Retrieves the list of public modules
-    /// </summary>
-    /// <returns>List of public registered modules</returns>
+
+
+
+
+    // == API Exposed Methods ==
+
     public IReadOnlyCollection<IModule> GetModules()
     {
         return publicModules.Values.Distinct().ToArray();
     }
 
-    /// <summary>
-    /// Retrieves a registered module of the provided type, or null if one is not registered
-    /// </summary>
-    /// <typeparam name="T">The class, e.g. ConfigurationModule, of the target module (must inherit from IModule)</typeparam>
-    /// <returns>The requested module</returns>
-    public T? Get<T>() where T : class, IModule
+    public int GetModulesCount()
+    {
+        return publicModules.Count;
+    }
+
+    public IModule? GetOrNull(string name)
+    {
+        IModule[] matchedModules = 
+            (
+                from IModule module in publicModules.Values
+                where module.Name == name
+                select module
+            ).ToArray();
+
+        if (matchedModules.Length == 1)
+        {
+            return matchedModules[0];
+        }
+        else if (matchedModules.Length > 1)
+        {
+            this.logger.Error($"Multiple modules are registered with a name of '{name}'");
+            throw new InvalidOperationException($"There are multiple registered modules of name '{name}'");
+        }
+
+        return null;
+    }
+
+    public T? GetOrNull<T>() where T : class, IModule
     {
         return publicModules.TryGetValue(typeof(T), out var module)
             ? module as T
             : null;
     }
+
+    public T GetOrThrow<T>() where T : class, IModule
+    {
+        publicModules.TryGetValue(typeof(T), out var module);
+        return module as T ?? throw new InvalidOperationException("Failed to retrieve module.");
+    }
+
+    public bool IsRegistered<T>() where T : class, IModule
+    {
+        return publicModules.ContainsKey(typeof(T));
+    }
+
+    public bool IsStarted<T>() where T : class, IModule
+    {
+        return publicModules.ContainsKey(typeof(T))
+                &&
+                publicModules[typeof(T)].Status == ModuleStatus.Started;
+    }
+
 }

@@ -1,42 +1,74 @@
-using OpenBot.API.Extensions;
+using OpenBot.API.Modules;
 
-namespace OpenBot.API.Modules;
+namespace OpenBot.API.Extensions;
 
 public interface IExtensionsManagerModule : IModule
 {
     /// <summary>
-    /// Returns the ExtensionMetadata for the given Extension, or null if not found
+    /// [0.1.0-beta]<br/>
+    /// Returns the ExtensionMetadata for the given Extension, or null if not found.
     /// </summary>
     ExtensionMetadata? GetExtensionMetadata(Extension extension);
 
     /// <summary>
-    /// Returns the ExtensionMetadata for the given extension name, or null if not found
+    /// [0.1.0-beta]<br/>
+    /// Returns the ExtensionMetadata for the given extension name, or null if not found.
     /// </summary>
     ExtensionMetadata? GetExtensionMetadata(string extensionName);
 
+
     /// <summary>
-    /// Retrieves a list of currently registered extensions
+    /// [0.1.0-beta]<br/>
+    /// Retrieves a list of registered extennsions.
     /// </summary>
-    /// <returns>A read-only collection of registered extensions</returns>
+    /// <returns></returns>
     IReadOnlyCollection<Extension> GetExtensions();
 
+
     /// <summary>
-    /// Gets the number of currently registered extensions
+    /// [0.1.0-beta]<br/>
+    /// Retrieves the number of registered extensions.
     /// </summary>
-    /// <returns>The number of currently registered extensions</returns>
     int GetExtensionsCount();
 
-    /// <summary>
-    /// Gets a registered extension of the provided name
-    /// </summary>
-    /// <param name="name">The name of the desired extension</param>
-    /// <returns>An Extension with a name which matches the provided name, or null if no extension was found</returns>
-    Extension? Get(string name);
 
     /// <summary>
-    /// Retrieves a registered extension of the provided type, or null if one is not registered
+    /// Retrieves an Extension of the given name, or null if one is not registered
     /// </summary>
-    /// <typeparam name="T">The type/class of the desired extension</typeparam>
-    /// <returns>The requested Extension, or null if one is not found</returns>
-    T? Get<T>() where T : Extension;
+    /// <param name="name">The name of the desired Extension</param>
+    /// <returns>The desired Extension, or null if not registered</returns>
+    public Extension? GetOrNull(string name);
+
+    /// <summary>
+    /// [0.1.0-beta]<br/>
+    /// Retrieves a registered extension of the given type, or null if one is not found.
+    /// </summary>
+    /// <typeparam name="T">The type of the desired extension</typeparam>
+    /// <returns>A registered Extension of the given type, or null if no such extension is registered.</returns>
+    public T? GetOrNull<T>() where T : Extension;
+
+    /// <summary>
+    /// [0.1.1-beta]<br/>
+    /// Retrieves a registered extension of the given type, or throws InvalidOperationException if such extension is not registered.
+    /// </summary>
+    /// <typeparam name="T">The type of the desired extension</typeparam>
+    /// <exception cref="InvalidOperationException">Thrown if a extension of the given type does not exist</exception>
+    /// <returns>A registered Extension of the given type.</returns>
+    public T GetOrThrow<T>() where T : Extension;
+
+    /// <summary>
+    /// [0.1.1-beta]<br/>
+    /// Determines whether a extension of the given type is registered.
+    /// </summary>
+    /// <typeparam name="T">The type of the extension to query</typeparam>
+    /// <returns>True if the extension is registered, otherwise false.</returns>
+    public bool IsRegistered<T>() where T : Extension;
+    
+    /// <summary>
+    /// [0.1.1-beta]<br/>
+    /// Determines whether a extension of the given type is started.
+    /// </summary>
+    /// <typeparam name="T">The type of the extension to query</typeparam>
+    /// <returns>True if the extension is started, otherwise false.</returns>
+    public bool IsStarted<T>() where T : Extension;
 }

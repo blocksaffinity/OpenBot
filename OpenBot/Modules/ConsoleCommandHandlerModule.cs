@@ -2,6 +2,7 @@
 
 using System.Text;
 using OpenBot.API;
+using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
 
 namespace OpenBot.Modules;
@@ -101,7 +102,7 @@ internal sealed class ConsoleCommandHandlerModule : Module
             }
             else if (consoleInput == "list extensions")
             {
-                Context.Modules.Get<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.WriteLine($"{ext.Name,-15} [Version: {ext.Metadata.version}] [API Version: {ext.Metadata.apiVersion}] [Status: {ext.Status}]"));
+                Context.Modules.GetOrNull<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.WriteLine($"{ext.Name,-15} [Version: {ext.Metadata.version}] [API Version: {ext.Metadata.apiVersion}] [Status: {ext.Status}]"));
                 Console.WriteLine("");
             }
             else if (consoleInput == "list modules")
