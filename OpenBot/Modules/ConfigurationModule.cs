@@ -29,14 +29,10 @@ internal sealed class ConfigurationModule : Module, IConfigurationModule
     {
         string botRootPath = API.OpenBot.GetRootDirectory();
 
-        // FIXME: for some reason, GetModules returns a list of extensions? maybe? maybe not???
-        bool isExtension = this.Context.Modules.GetModules().Any(
-            module =>
-                module.Name.Equals(moduleName, StringComparison.OrdinalIgnoreCase)
-        );
+        bool isModule = this.Context.Modules.GetOrNull_IncPrivate(moduleName) is Module;
 
         // make sure its a module and not an extension
-        if (!isExtension)
+        if (isModule)
         {
             return Path.GetFullPath(Path.Combine(botRootPath, "ModuleConfig", moduleName, "config.yml"));
         }
@@ -86,10 +82,9 @@ internal sealed class ConfigurationModule : Module, IConfigurationModule
         {
             string contents = File.ReadAllText(yamlPath);
             // Deserialize file contents into config variable
-            // TODO: Deserialize<T> can return null, this must be handled
             try
             {
-                config = deserializer.Deserialize<T>(contents);
+                config = deserializer.Deserialize<T>(contents) ?? throw new ConfigurationException(moduleName, $"Failed to deserialize {Path.GetFileName(yamlPath)}, please check your configuration.");
             }
             catch (YamlException ex)
             {
@@ -167,10 +162,9 @@ internal sealed class ConfigurationModule : Module, IConfigurationModule
         {
             string contents = File.ReadAllText(yamlPath);
             // Deserialize file contents into config variable
-            // TODO: Deserialize<T> can return null, this must be handled
             try
             {
-                config = deserializer.Deserialize<T>(contents);
+                config = deserializer.Deserialize<T>(contents) ?? throw new ConfigurationException(moduleName, $"Failed to deserialize {Path.GetFileName(yamlPath)}, please check your configuration.");
             }
             catch (YamlException ex)
             {

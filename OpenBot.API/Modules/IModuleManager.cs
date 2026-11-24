@@ -62,4 +62,16 @@ public interface IModuleManager
     /// <typeparam name="T">The type of the module to query</typeparam>
     /// <returns>True if the module is started, otherwise false.</returns>
     public bool IsStarted<T>() where T : class, IModule;
+
+
+    /// <summary>
+    /// Gets a module with the provided name, or null if not found<br/>
+    /// Includes PRIVATE modules<br/>
+    /// Do NOT expose this!!!
+    /// </summary>
+    /// <param name="name">Name of the module</param>
+    /// <returns>An IModule with the provided name, or null if one is not registered</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    // DO NOT EXPOSE THIS
+    internal IModule? GetOrNull_IncPrivate(string name);
 }

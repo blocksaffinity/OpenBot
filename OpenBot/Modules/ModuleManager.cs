@@ -33,8 +33,6 @@ internal sealed class ModuleManager : IModuleManager
             return;
         }
 
-        modules.Add(module.GetType(), module);
-        //this.logger.Info($"Registered module {module.Name}");
         try
         {
             await module.RegisterAsync();
@@ -42,13 +40,28 @@ internal sealed class ModuleManager : IModuleManager
         catch (Exception ex)
         {
             logger.Error($"Failed to register module {module.Name}: {ex}");
+            return;
         }
 
-        foreach (var type in module.GetType().GetInterfaces())
+        modules.Add(module.GetType(), module);
+        //this.logger.Info($"Registered module {module.Name}");
+
+        this.logger.Debug($"Registered module: {module.Name}");
+        this.logger.Debug($"Public module: {module is not PrivateModule}");
+        this.logger.Debug($"Module type: {module.GetType().FullName}");
+        
+
+        if (module is not PrivateModule)
         {
-            if (typeof(IModule).IsAssignableFrom(type))
+            publicModules.Add(module.GetType(), module);
+
+            // WTF even is this?!
+            foreach (var type in module.GetType().GetInterfaces())
             {
-                publicModules[type] = module;
+                if (typeof(IModule).IsAssignableFrom(type))
+                {
+                    publicModules[type] = module;
+                }
             }
         }
     }
@@ -104,6 +117,31 @@ internal sealed class ModuleManager : IModuleManager
     internal T GetInternal<T>() where T : Module
     {
         return (T)modules[typeof(T)];
+    }
+
+
+    // Do not expose    
+    IModule? IModuleManager.GetOrNull_IncPrivate(string name)
+    {
+        IModule[] matchedModules = 
+            (
+                //                     V-- The only difference lol
+                from IModule module in modules.Values
+                where module.Name == name
+                select module
+            ).ToArray();
+
+        if (matchedModules.Length == 1)
+        {
+            return matchedModules[0];
+        }
+        else if (matchedModules.Length > 1)
+        {
+            this.logger.Error($"Multiple modules are registered with a name of '{name}'");
+            throw new InvalidOperationException($"There are multiple registered modules of name '{name}'");
+        }
+
+        return null;
     }
 
 
@@ -191,5 +229,4 @@ internal sealed class ModuleManager : IModuleManager
                 &&
                 publicModules[typeof(T)].Status == ModuleStatus.Started;
     }
-
 }
