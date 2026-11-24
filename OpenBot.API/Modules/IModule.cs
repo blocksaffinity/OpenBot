@@ -5,5 +5,7 @@ namespace OpenBot.API.Modules;
 public interface IModule
 {
     string Name { get; }
-    ModuleStatus Status { get; }
+    ILogger Logger { get; }
+    ModuleContext Context { get; }
+    ModuleStatus Status  { get; }
 }

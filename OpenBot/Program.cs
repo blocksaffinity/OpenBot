@@ -6,8 +6,7 @@ var moduleManager = new ModuleManager();
 var coreContext = new ModuleContext(
     "Core",
     LoggingService.GetLogger("Core"),
-    moduleManager,
-    null
+    moduleManager
 );
 
 Core core = new(moduleManager, coreContext);

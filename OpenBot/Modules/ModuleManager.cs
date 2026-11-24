@@ -35,7 +35,14 @@ internal sealed class ModuleManager : IModuleManager
 
         modules.Add(module.GetType(), module);
         //this.logger.Info($"Registered module {module.Name}");
-        await module.RegisterAsync();
+        try
+        {
+            await module.RegisterAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Failed to register module {module.Name}: {ex}");
+        }
 
         foreach (var type in module.GetType().GetInterfaces())
         {
@@ -143,6 +150,28 @@ internal sealed class ModuleManager : IModuleManager
         return publicModules.TryGetValue(typeof(T), out var module)
             ? module as T
             : null;
+    }
+
+    public IModule GetOrThrow(string name)
+    {
+        IModule[] matchedModules = 
+            (
+                from IModule module in publicModules.Values
+                where module.Name == name
+                select module
+            ).ToArray();
+
+        if (matchedModules.Length == 1)
+        {
+            return matchedModules[0];
+        }
+        else if (matchedModules.Length > 1)
+        {
+            this.logger.Error($"Multiple modules are registered with a name of '{name}'");
+            throw new InvalidOperationException($"There are multiple registered modules of name '{name}'");
+        }
+
+        throw new InvalidOperationException($"Failed to retrieve module {name}.");
     }
 
     public T GetOrThrow<T>() where T : class, IModule

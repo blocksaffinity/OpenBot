@@ -26,8 +26,7 @@ internal class Core : Module
         var configurationContext = new ModuleContext(
             "Configuration",
             LoggingService.GetLogger("Configuration"),
-            moduleManager,
-            null
+            moduleManager
         );
         var configuration = new ConfigurationModule(configurationContext);
         await moduleManager.Register(configuration);
@@ -37,8 +36,7 @@ internal class Core : Module
         var authenticationContext = new ModuleContext(
             "Authentication",
             LoggingService.GetLogger("Authentication"),
-            moduleManager,
-            configuration
+            moduleManager
         );
         var authentication = new AuthenticationModule(authenticationContext);
         await moduleManager.Register(authentication);
@@ -48,8 +46,7 @@ internal class Core : Module
         var discordContext = new ModuleContext(
             "Discord",
             LoggingService.GetLogger("Discord"),
-            moduleManager,
-            configuration
+            moduleManager
         );
         var discord = new DiscordModule(discordContext, authentication);
         await moduleManager.Register(discord);
@@ -59,8 +56,7 @@ internal class Core : Module
         var extensionsContext = new ModuleContext(
             "Extensions",
             LoggingService.GetLogger("Extensions"),
-            moduleManager,
-            configuration
+            moduleManager
         );
         var extensions = new ExtensionsManagerModule(extensionsContext);
         await moduleManager.Register(extensions);
@@ -70,8 +66,7 @@ internal class Core : Module
         var cchContext = new ModuleContext(
             "CCommandHandler",
             LoggingService.GetLogger("CCommandHandler"),
-            moduleManager,
-            configuration
+            moduleManager
         );
         var cch = new ConsoleCommandHandlerModule(cchContext);
         await moduleManager.Register(cch);
@@ -109,18 +104,28 @@ internal class Core : Module
                 foreach (Type type in types)
                 {
                     ExtensionContext extensionContext = new(
-                        name                 : extensionName,
-                        logger               : logger,
-                        modules              : moduleManager,
-                        configurationProvider: configuration,
-                        meta                 : extensionMeta
+                        name    : extensionName,
+                        logger  : logger,
+                        modules : moduleManager,
+                        meta    : extensionMeta
                     );
-                    object? instance = Activator.CreateInstance(type, extensionContext);
-
-                    if (instance is Extension validExtension)
+                    try
                     {
-                        extension = validExtension;
+                        object? instance = Activator.CreateInstance(type, extensionContext);
+
+                        if (instance is Extension validExtension)
+                        {
+                            extension = validExtension;
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        // Exceptions can be thrown whilst constructing extensions or modules
+                        logger.Error($"Failed to construct extension {extensionName}, it will not be loaded. {ex}");
+                        // gotta pass it through
+                        throw ex;
+                    }
+                    
                 }
                 if (extension is not null)
                 {

@@ -50,31 +50,31 @@ public abstract class Module : IModule
 
     protected T GetConfig<T>() where T : class, new()
     {
-        if (Context.Configuration is null)
+        if (Context.ConfigurationModule is null)
         {
             throw new InvalidOperationException("Configuration is not available.");
         }
 
-        return Context.Configuration.GetConfig<T>(Name);
+        return Context.ConfigurationModule.GetConfig<T>(Name);
     }
 
     protected void SaveConfig<T>(T config) where T : class
     {
-        if (Context.Configuration is null)
+        if (Context.ConfigurationModule is null)
         {
             throw new InvalidOperationException("Configuration is not available.");
         }
 
-        Context.Configuration.SaveConfig(Name, config);
+        Context.ConfigurationModule.SaveConfig(Name, config);
     }
 
     protected void ReloadConfig<T>() where T : class, new()
     {
-        if (Context.Configuration is null)
+        if (Context.ConfigurationModule is null)
         {
             throw new InvalidOperationException("Configuration is not available.");
         }
         
-        Context.Configuration.ReloadConfig<T>(Name);
+        Context.ConfigurationModule.ReloadConfig<T>(Name);
     }
 }

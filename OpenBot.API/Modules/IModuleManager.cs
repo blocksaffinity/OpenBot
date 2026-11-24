@@ -6,7 +6,6 @@ public interface IModuleManager
     /// [0.1.0-beta]<br/>
     /// Retrieves a list of registered modules.
     /// </summary>
-    /// <returns></returns>
     IReadOnlyCollection<IModule> GetModules();
 
     /// <summary>
@@ -17,7 +16,7 @@ public interface IModuleManager
 
     /// <summary>
     /// [0.1.0-beta]<br/>
-    /// Retrieves an IModule of the given name, or null if one is not registered
+    /// Retrieves an IModule of the given name, or null if one is not registered.
     /// </summary>
     /// <param name="name">The name of the desired IModule</param>
     /// <returns>The desired IModule, or null if not registered</returns>
@@ -30,6 +29,14 @@ public interface IModuleManager
     /// <typeparam name="T">The type of the desired module</typeparam>
     /// <returns>A registered Module of the given type, or null if no such module is registered.</returns>
     public T? GetOrNull<T>() where T : class, IModule;
+
+    /// <summary>
+    /// Retrieves an IModule of the given name, or throws InvalidOperationException if such module is not registered.
+    /// </summary>
+    /// <param name="name">The name of the desired IModule</param>
+    /// <exception cref="InvalidOperationException">Thrown if a module of the given name does not exist</exception>
+    /// <returns>The desired IModule</returns>
+    public IModule GetOrThrow(string name);
 
     /// <summary>
     /// [0.1.0-beta]<br/>

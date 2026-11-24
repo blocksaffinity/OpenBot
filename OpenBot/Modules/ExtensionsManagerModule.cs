@@ -43,7 +43,14 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
         // Now register the extension
         extensions.Add(extension.GetType(), extension);
         //this.Logger.Info($"Registered extension {extension.Name}");
-        await extension.RegisterAsync();
+        try
+        {
+            await extension.RegisterAsync();
+        }
+        catch (Exception ex)
+        {
+            this.Logger.Error($"Failed to register extension {extension.Name}: {ex}");
+        }
     }
 
     /// <summary>
@@ -233,6 +240,28 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
         return extensions.TryGetValue(typeof(T), out var extension)
             ? extension as T
             : null;
+    }
+
+    public Extension GetOrThrow(string name)
+    {
+        Extension[] matchedExtensions = 
+            (
+                from Extension extension in extensions.Values
+                where extension.Name == name
+                select extension
+            ).ToArray();
+
+        if (matchedExtensions.Length == 1)
+        {
+            return matchedExtensions[0];
+        }
+        else if (matchedExtensions.Length > 1)
+        {
+            this.Logger.Error($"Multiple extensions are registered with a name of '{name}'");
+            throw new InvalidOperationException($"There are multiple registered extensions of name '{name}'");
+        }
+
+        throw new InvalidOperationException($"Failed to retrieve extension {name}.");
     }
 
     public T GetOrThrow<T>() where T : Extension

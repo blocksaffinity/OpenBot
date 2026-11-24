@@ -48,6 +48,14 @@ public interface IExtensionsManagerModule : IModule
     public T? GetOrNull<T>() where T : Extension;
 
     /// <summary>
+    /// Retrieves an Extension of the given name, or throws InvalidOperationException if such extension is not registered.
+    /// </summary>
+    /// <param name="name">The name of the desired Extension</param>
+    /// <exception cref="InvalidOperationException">Thrown if an extension of the given name does not exist</exception>
+    /// <returns>The desired Extension</returns>
+    public Extension GetOrThrow(string name);
+
+    /// <summary>
     /// [0.1.0-beta]<br/>
     /// Retrieves a registered extension of the given type, or throws InvalidOperationException if such extension is not registered.
     /// </summary>
