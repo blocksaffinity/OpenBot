@@ -154,6 +154,7 @@ internal class Core : Module
 
 
         // TODO: Implement a graceful shutdown
+        // Note: running `stop` is graceful
         //await Task.Delay(Timeout.Infinite);
 
         await cch.CommandHandlerLoop(extMan: extensions, modMan: moduleManager);
