@@ -27,7 +27,9 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
         }
 
         // Name taken validation
-        if (extensions.ContainsKey(extension.GetType()) || extensions.ContainsValue(extension))
+        if (extensions.Values.ToList().Where(ext => ext.Name == extension.Name).ToArray().Length != 0
+            || extensions.ContainsKey(extension.GetType())
+            || extensions.ContainsValue(extension))
         {
             this.Logger.Warn($"Extension {extension.Name} is already registered, skipping...");
             return;
@@ -40,9 +42,6 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
             return;
         }
 
-        // Now register the extension
-        extensions.Add(extension.GetType(), extension);
-        //this.Logger.Info($"Registered extension {extension.Name}");
         try
         {
             await extension.RegisterAsync();
@@ -50,7 +49,13 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
         catch (Exception ex)
         {
             this.Logger.Error($"Failed to register extension {extension.Name}: {ex}");
+            return;
         }
+
+        // Now register the extension
+        extensions.Add(extension.GetType(), extension);
+        //this.Logger.Info($"Registered extension {extension.Name}");
+        
     }
 
     /// <summary>
@@ -210,7 +215,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
 
     public int GetExtensionsCount()
     {
-        return extensions.Count;
+        return extensions.Distinct().Count();
     }
 
     public Extension? GetOrNull(string name)

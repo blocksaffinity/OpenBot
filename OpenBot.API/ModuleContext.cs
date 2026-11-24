@@ -28,13 +28,13 @@ public class ModuleContext
     /// [0.1.0-beta]<br/>
     /// The globally registered IDiscordModule module.
     /// </summary>
-    public IDiscordModule? DiscordModule { get; }
+    public IDiscordModule? DiscordModule { get; set; }
     
     /// <summary>
     /// [0.1.0-beta]<br/>
     /// The globally registered IConfigurationModule module.
     /// </summary>
-    public IConfigurationModule? ConfigurationModule { get; }
+    public IConfigurationModule? ConfigurationModule { get; set; }
 
     /// <summary>
     /// [0.1.0-beta]<br/>

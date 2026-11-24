@@ -43,13 +43,13 @@ public sealed class ExtensionContext
     /// [0.1.0-beta]<br/>
     /// The globally registered IDiscordModule module.
     /// </summary>
-    public IDiscordModule DiscordModule { get; }
+    public IDiscordModule DiscordModule { get; set; }
     
     /// <summary>
     /// [0.1.0-beta]<br/>
     /// The globally registered IConfigurationModule module.
     /// </summary>
-    public IConfigurationModule ConfigurationModule { get; }
+    public IConfigurationModule ConfigurationModule { get; set; }
 
     /// <summary>
     /// [0.1.0-beta]<br/>
@@ -108,6 +108,9 @@ public sealed class ExtensionContext
         Modules = modules;
         Metadata = meta;
 
+        // If any module is not registered upon the construction of ExtensionContext, the class will not contruct,
+        // and therefore the extension will not load.
+        // This means all of these modules are REQUIRED to have been registered BEFORE the registration of any extension.
         Extensions = Modules.GetOrThrow<IExtensionsManagerModule>();
         DiscordModule = Modules.GetOrThrow<IDiscordModule>();
         ConfigurationModule = Modules.GetOrThrow<IConfigurationModule>();

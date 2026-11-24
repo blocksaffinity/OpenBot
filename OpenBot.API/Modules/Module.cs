@@ -24,6 +24,8 @@ public abstract class Module : IModule
     }
     internal async Task StartAsync()
     {
+        Context.DiscordModule = Context.Modules.GetOrThrow<IDiscordModule>();
+        Context.ConfigurationModule = Context.Modules.GetOrThrow<IConfigurationModule>();
         await OnStartAsync();
         Status = ModuleStatus.Started;
     }
