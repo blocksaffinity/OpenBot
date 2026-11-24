@@ -3,14 +3,14 @@ namespace OpenBot.API.Modules;
 public interface IModuleManager
 {
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Retrieves a list of registered modules.
     /// </summary>
     /// <returns></returns>
     IReadOnlyCollection<IModule> GetModules();
 
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Retrieves the number of registered modules.
     /// </summary>
     int GetModulesCount();
@@ -31,7 +31,7 @@ public interface IModuleManager
     public T? GetOrNull<T>() where T : class, IModule;
 
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Retrieves a registered module of the given type, or throws InvalidOperationException if such module is not registered.
     /// </summary>
     /// <typeparam name="T">The type of the desired module</typeparam>
@@ -40,7 +40,7 @@ public interface IModuleManager
     public T GetOrThrow<T>() where T : class, IModule;
 
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Determines whether a module of the given type is registered.
     /// </summary>
     /// <typeparam name="T">The type of the module to query</typeparam>
@@ -48,7 +48,7 @@ public interface IModuleManager
     public bool IsRegistered<T>() where T : class, IModule;
     
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Determines whether a module of the given type is started.
     /// </summary>
     /// <typeparam name="T">The type of the module to query</typeparam>

@@ -48,7 +48,7 @@ public interface IExtensionsManagerModule : IModule
     public T? GetOrNull<T>() where T : Extension;
 
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Retrieves a registered extension of the given type, or throws InvalidOperationException if such extension is not registered.
     /// </summary>
     /// <typeparam name="T">The type of the desired extension</typeparam>
@@ -57,7 +57,7 @@ public interface IExtensionsManagerModule : IModule
     public T GetOrThrow<T>() where T : Extension;
 
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Determines whether a extension of the given type is registered.
     /// </summary>
     /// <typeparam name="T">The type of the extension to query</typeparam>
@@ -65,7 +65,7 @@ public interface IExtensionsManagerModule : IModule
     public bool IsRegistered<T>() where T : Extension;
     
     /// <summary>
-    /// [0.1.1-beta]<br/>
+    /// [0.1.0-beta]<br/>
     /// Determines whether a extension of the given type is started.
     /// </summary>
     /// <typeparam name="T">The type of the extension to query</typeparam>
