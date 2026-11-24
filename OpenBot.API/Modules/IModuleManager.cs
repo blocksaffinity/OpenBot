@@ -16,6 +16,7 @@ public interface IModuleManager
     int GetModulesCount();
 
     /// <summary>
+    /// [0.1.0-beta]<br/>
     /// Retrieves an IModule of the given name, or null if one is not registered
     /// </summary>
     /// <param name="name">The name of the desired IModule</param>
