@@ -57,6 +57,7 @@ public class Logger : ILogger
         ConsoleUtils.WriteLine(
             $"&7{now:yyyy-MM-dd HH:mm:ss} [{Name,-15}] {colour}{level,-5} &r{text}"
         );
-        FileUtils.AddLineToFile($"{now:yyyy-MM-dd HH:mm:ss} {level,-5} {text}", LogFilePath);
+        //TODO: Implement buffered file writing
+        FileUtils.AddLineToFile($"{now:yyyy-MM-dd HH:mm:ss} [{Name,-15}] {level,-5} {text}", LogFilePath);
     }
 }
