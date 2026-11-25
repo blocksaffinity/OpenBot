@@ -13,6 +13,13 @@ var coreContext = new ModuleContext(
 
 Core core = new(moduleManager, coreContext);
 
-await core.RunAsync();
+try
+{
+    await core.RunAsync();
+}
+catch (Exception ex)
+{
+    logger.Fatal($"An uncaught {ex.GetType()} occurred: {ex.Message}\n{ex.StackTrace}");
+}
 
 logger.Info("Goodbye, thanks for using OpenBot!");
