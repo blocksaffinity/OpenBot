@@ -44,11 +44,7 @@ internal sealed class ModuleManager : IModuleManager
         }
 
         modules.Add(module.GetType(), module);
-        //this.logger.Info($"Registered module {module.Name}");
-
-        this.logger.Debug($"Registered module: {module.Name}");
-        this.logger.Debug($"Public module: {module is not PrivateModule}");
-        this.logger.Debug($"Module type: {module.GetType().FullName}");
+        this.logger.Debug($"Registered module {module.Name}");
         
 
         if (module is not PrivateModule)

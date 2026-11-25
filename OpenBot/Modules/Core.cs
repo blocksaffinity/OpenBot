@@ -19,58 +19,68 @@ internal class Core : Module
 
         this.Logger.Hint($"OpenBot directory: {API.OpenBot.GetRootDirectory()}");
 
+        ModuleContext configContext;
+        ModuleContext authContext;
+        ModuleContext discordContext;
+        ModuleContext extensionsContext;
+        ModuleContext cchContext;
+
+        ConfigurationModule configurationModule;
+        AuthenticationModule authenticationModule;
+        DiscordModule discordModule;
+        ExtensionsManagerModule extensionsManagerModule;
+        ConsoleCommandHandlerModule consoleCommandHandlerModule;
         
-        // #1 Configuration module
-        var configurationContext = new ModuleContext(
-            "Configuration",
-            LoggingService.GetLogger("Configuration"),
-            moduleManager
-        );
-        var configuration = new ConfigurationModule(configurationContext);
-
-
-        // #2 Authentication module
-        var authenticationContext = new ModuleContext(
-            "Authentication",
-            LoggingService.GetLogger("Authentication"),
-            moduleManager
-        );
-        var authentication = new AuthenticationModule(authenticationContext);
-
-
-        // #3 Discord module
-        var discordContext = new ModuleContext(
-            "Discord",
-            LoggingService.GetLogger("Discord"),
-            moduleManager
-        );
-        var discord = new DiscordModule(discordContext, authentication);
-
-
-        // #4 Extensions module
-        var extensionsContext = new ModuleContext(
-            "Extensions",
-            LoggingService.GetLogger("Extensions"),
-            moduleManager
-        );
-        var extensions = new ExtensionsManagerModule(extensionsContext);
-
-
-        // #5 ConsoleCommandHandler module
-        var cchContext = new ModuleContext(
-            "CCommandHandler",
-            LoggingService.GetLogger("CCommandHandler"),
-            moduleManager
-        );
-        var cch = new ConsoleCommandHandlerModule(cchContext);
 
         try
         {
-            await moduleManager.Register(configuration);
-            await moduleManager.Register(authentication);
-            await moduleManager.Register(discord);
-            await moduleManager.Register(extensions);
-            await moduleManager.Register(cch);
+            // #1 Configuration module
+            configContext = new ModuleContext(
+                "Configuration",
+                LoggingService.GetLogger("Configuration"),
+                moduleManager
+            );
+            configurationModule = new ConfigurationModule(configContext);
+            await moduleManager.Register(configurationModule);
+
+            // #2 Authentication module
+            authContext = new ModuleContext(
+                "Authentication",
+                LoggingService.GetLogger("Authentication"),
+                moduleManager
+            );
+            authenticationModule = new AuthenticationModule(authContext);
+            await moduleManager.Register(authenticationModule);
+
+
+            // #3 Discord module
+            discordContext = new ModuleContext(
+                "Discord",
+                LoggingService.GetLogger("Discord"),
+                moduleManager
+            );
+            discordModule = new DiscordModule(discordContext, authenticationModule);
+            await moduleManager.Register(discordModule);
+
+
+            // #4 Extensions module
+            extensionsContext = new ModuleContext(
+                "Extensions",
+                LoggingService.GetLogger("Extensions"),
+                moduleManager
+            );
+            extensionsManagerModule = new ExtensionsManagerModule(extensionsContext);
+            await moduleManager.Register(extensionsManagerModule);
+
+
+            // #5 ConsoleCommandHandler module
+            cchContext = new ModuleContext(
+                "CCommandHandler",
+                LoggingService.GetLogger("CCommandHandler"),
+                moduleManager
+            );
+            consoleCommandHandlerModule = new ConsoleCommandHandlerModule(cchContext);
+            await moduleManager.Register(consoleCommandHandlerModule);
         }
         catch
         {
@@ -92,7 +102,7 @@ internal class Core : Module
         }
 
         // This doesn't throw
-        ExtensionMetadata[] extensionMetas = extensions.DiscoverExtensions();
+        ExtensionMetadata[] extensionMetas = extensionsManagerModule.DiscoverExtensions();
 
         // Assembly loading stuff
         foreach (ExtensionMetadata extensionMeta in extensionMetas)
@@ -114,7 +124,7 @@ internal class Core : Module
             {
                 string dllFile = extensionMeta.file ?? $"{extensionName}.dll";
                 string dllPath = Path.Combine(API.OpenBot.GetRootDirectory(), "Extensions", extensionName, dllFile);
-                Type[] types = extensions.LoadExtensionTypes(dllPath: dllPath);
+                Type[] types = extensionsManagerModule.LoadExtensionTypes(dllPath: dllPath);
                 Extension? extension = null;
                 Logger logger = LoggingService.GetLogger(extensionName);
 
@@ -148,7 +158,7 @@ internal class Core : Module
                 {
                     try
                     {
-                        await extensions.Register(extension, extensionMeta);
+                        await extensionsManagerModule.Register(extension, extensionMeta);
                     }
                     catch
                     {
@@ -164,10 +174,10 @@ internal class Core : Module
             }
         }
 
-        await extensions.StartAllExtensionsAsync();
+        await extensionsManagerModule.StartAllExtensionsAsync();
 
         // If there's no extensions loaded
-        if (extensions.GetExtensionsCount() < 1)
+        if (extensionsManagerModule.GetExtensionsCount() < 1)
         {
             this.Logger.Hint("No extensions are loaded! Make sure to add some to give your bot some functionality!");
         }
@@ -183,6 +193,6 @@ internal class Core : Module
         // Note: running `stop` is graceful
         //await Task.Delay(Timeout.Infinite);
 
-        await cch.CommandHandlerLoop(extMan: extensions, modMan: moduleManager);
+        await consoleCommandHandlerModule.CommandHandlerLoop(extMan: extensionsManagerModule, modMan: moduleManager);
     }
 }

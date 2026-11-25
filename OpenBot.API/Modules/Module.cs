@@ -54,7 +54,7 @@ public abstract class Module : IModule
     {
         if (Context.ConfigurationModule is null)
         {
-            throw new InvalidOperationException("Configuration is not available.");
+            throw new InvalidOperationException("ConfigurationModule is null.");
         }
 
         return Context.ConfigurationModule.GetConfig<T>(Name);
@@ -64,7 +64,7 @@ public abstract class Module : IModule
     {
         if (Context.ConfigurationModule is null)
         {
-            throw new InvalidOperationException("Configuration is not available.");
+            throw new InvalidOperationException("ConfigurationModule is null.");
         }
 
         Context.ConfigurationModule.SaveConfig(Name, config);
@@ -74,7 +74,7 @@ public abstract class Module : IModule
     {
         if (Context.ConfigurationModule is null)
         {
-            throw new InvalidOperationException("Configuration is not available.");
+            throw new InvalidOperationException("ConfigurationModule is null.");
         }
         
         Context.ConfigurationModule.ReloadConfig<T>(Name);
