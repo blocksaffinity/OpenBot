@@ -40,7 +40,7 @@ internal sealed class ModuleManager : IModuleManager
         catch (Exception ex)
         {
             logger.Error($"Failed to register module {module.Name}: {ex}");
-            return;
+            throw;
         }
 
         modules.Add(module.GetType(), module);
@@ -67,7 +67,8 @@ internal sealed class ModuleManager : IModuleManager
     }
 
     /// <summary>
-    /// Starts all registered modules
+    /// Starts all registered modules<br/>
+    /// Throws an exception of a module threw one
     /// </summary>
     internal async Task StartAllModulesAsync()
     {
@@ -86,6 +87,7 @@ internal sealed class ModuleManager : IModuleManager
             catch (Exception ex)
             {
                 this.logger.Error($"Failed to start module {module.Name}: {ex}");
+                throw;
             }
         }
     }

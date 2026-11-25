@@ -19,9 +19,7 @@ internal class Core : Module
 
         this.Logger.Hint($"OpenBot directory: {API.OpenBot.GetRootDirectory()}");
 
-        this.Logger.Debug("Registering modules...");
-
-
+        
         // #1 Configuration module
         var configurationContext = new ModuleContext(
             "Configuration",
@@ -29,7 +27,6 @@ internal class Core : Module
             moduleManager
         );
         var configuration = new ConfigurationModule(configurationContext);
-        await moduleManager.Register(configuration);
 
 
         // #2 Authentication module
@@ -39,7 +36,6 @@ internal class Core : Module
             moduleManager
         );
         var authentication = new AuthenticationModule(authenticationContext);
-        await moduleManager.Register(authentication);
 
 
         // #3 Discord module
@@ -49,7 +45,6 @@ internal class Core : Module
             moduleManager
         );
         var discord = new DiscordModule(discordContext, authentication);
-        await moduleManager.Register(discord);
 
 
         // #4 Extensions module
@@ -59,7 +54,6 @@ internal class Core : Module
             moduleManager
         );
         var extensions = new ExtensionsManagerModule(extensionsContext);
-        await moduleManager.Register(extensions);
 
 
         // #5 ConsoleCommandHandler module
@@ -69,11 +63,35 @@ internal class Core : Module
             moduleManager
         );
         var cch = new ConsoleCommandHandlerModule(cchContext);
-        await moduleManager.Register(cch);
 
+        try
+        {
+            await moduleManager.Register(configuration);
+            await moduleManager.Register(authentication);
+            await moduleManager.Register(discord);
+            await moduleManager.Register(extensions);
+            await moduleManager.Register(cch);
+        }
+        catch
+        {
+            // Don't include the exception itself, already been logged in moduleManager.Register()
+            this.Logger.Fatal("A module failed to register, startup aborted.");
+            return;
+        }
 
-        await moduleManager.StartAllModulesAsync();
+        try
+        {
+            // Modules are required, so if one fails to start we're gonna stop the entire bot from starting
+            await moduleManager.StartAllModulesAsync();   
+        }
+        catch
+        {
+            // Don't include the exception itself, already been logged in moduleManager.StartAllModulesAsync()
+            this.Logger.Fatal("A module failed to start, startup aborted.");
+            return;
+        }
 
+        // This doesn't throw
         ExtensionMetadata[] extensionMetas = extensions.DiscoverExtensions();
 
         // Assembly loading stuff
@@ -81,7 +99,7 @@ internal class Core : Module
         {
             if (extensionMeta is null)
             {
-                // A log message has already been written
+                // A log message has already been written [Apparently..?]
                 // Just skip this extension
                 continue;
             }
@@ -122,19 +140,27 @@ internal class Core : Module
                     {
                         // Exceptions can be thrown whilst constructing extensions or modules
                         logger.Error($"Failed to construct extension {extensionName}, it will not be loaded. {ex}");
-                        // gotta pass it through
-                        throw ex;
+                        continue;
                     }
                     
                 }
                 if (extension is not null)
                 {
-                    await extensions.Register(extension, extensionMeta);
+                    try
+                    {
+                        await extensions.Register(extension, extensionMeta);
+                    }
+                    catch
+                    {
+                        // Don't include the exception itself, already been logged in extensions.Register()
+                        this.Logger.Error($"Failed to register extension {extensionName}, it will not be available.");
+                        continue;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Logger.Warn($"Failed to load extension {extensionName}: {ex}");
+                this.Logger.Warn($"Failed to load extension {extensionName}: {ex}");
             }
         }
 
@@ -158,7 +184,5 @@ internal class Core : Module
         //await Task.Delay(Timeout.Infinite);
 
         await cch.CommandHandlerLoop(extMan: extensions, modMan: moduleManager);
-
-        this.Logger.Info("Goodbye, thanks for using OpenBot!");
     }
 }
