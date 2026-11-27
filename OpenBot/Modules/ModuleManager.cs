@@ -64,7 +64,7 @@ internal sealed class ModuleManager : IModuleManager
 
     /// <summary>
     /// Starts all registered modules<br/>
-    /// Throws an exception of a module threw one
+    /// Throws an exception if a module threw one
     /// </summary>
     internal async Task StartAllModulesAsync()
     {
