@@ -156,7 +156,7 @@ internal sealed class ModuleManager : IModuleManager
 
     public int GetModulesCount()
     {
-        return publicModules.Count;
+        return publicModules.Distinct().Count();
     }
 
     public IModule? GetOrNull(string name)
