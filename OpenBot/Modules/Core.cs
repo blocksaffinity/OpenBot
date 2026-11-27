@@ -193,6 +193,11 @@ internal class Core : Module
         // Note: running `stop` is graceful
         //await Task.Delay(Timeout.Infinite);
 
-        await consoleCommandHandlerModule.CommandHandlerLoop(extMan: extensionsManagerModule, modMan: moduleManager);
+        await consoleCommandHandlerModule.CommandHandlerLoop();
+
+        // Bot is now shutting down!
+
+        await extensionsManagerModule.StopAllExtensionsAsync();
+        await moduleManager.StopAllModulesAsync();
     }
 }

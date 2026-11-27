@@ -77,7 +77,7 @@ internal sealed class ConsoleCommandHandlerModule : Module
         }, ct);
     }
 
-    internal async Task CommandHandlerLoop(ExtensionsManagerModule extMan, ModuleManager modMan, CancellationToken ct = default)
+    internal async Task CommandHandlerLoop(CancellationToken ct = default)
     {
         // Replaced scary while(true) with cancellation-safe loop
         while (!ct.IsCancellationRequested)
@@ -112,8 +112,6 @@ internal sealed class ConsoleCommandHandlerModule : Module
             }
             else if (consoleInput == "stop")
             {
-                await extMan.StopAllExtensionsAsync();
-                await modMan.StopAllModulesAsync();
                 break;
             }
             else
