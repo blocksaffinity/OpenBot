@@ -4,6 +4,7 @@ using OpenBot.API;
 using OpenBot.API.Enums;
 using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
+using OpenBot.Events;
 using OpenBot.Utils;
 
 namespace OpenBot.Modules;
@@ -11,8 +12,10 @@ namespace OpenBot.Modules;
 internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
 {
     private Dictionary<Type, Extension> extensions = [];
-    internal ExtensionsManagerModule(ModuleContext context) : base(context)
+    private readonly OpenBotEvents events;
+    internal ExtensionsManagerModule(ModuleContext context, OpenBotEvents events) : base(context)
     {
+        this.events = events;
     }
 
 
@@ -45,6 +48,7 @@ internal sealed class ExtensionsManagerModule : Module, IExtensionsManagerModule
         try
         {
             await extension.RegisterAsync();
+            events.RaiseExtensionStarted(extension);
         }
         catch (Exception ex)
         {

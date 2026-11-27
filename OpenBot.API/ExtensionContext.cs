@@ -1,4 +1,5 @@
 using OpenBot.API.Enums;
+using OpenBot.API.Events;
 using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
 
@@ -50,6 +51,12 @@ public sealed class ExtensionContext
     /// The globally registered IConfigurationModule module.
     /// </summary>
     public IConfigurationModule ConfigurationModule { get; set; }
+    
+    /// <summary>
+    /// [0.2.0-beta]<br/>
+    /// The instance of the IOpenBotEvents
+    /// </summary>
+    public IOpenBotEvents Events { get; }
 
     /// <summary>
     /// [0.1.0-beta]<br/>
@@ -101,12 +108,14 @@ public sealed class ExtensionContext
         string name,
         ILogger logger,
         IModuleManager modules,
-        ExtensionMetadata meta)
+        ExtensionMetadata meta,
+        IOpenBotEvents events)
     {
         Name = name;
         Logger = logger;
         Modules = modules;
         Metadata = meta;
+        Events = events;
 
         // If any module is not registered upon the construction of ExtensionContext, the class will not contruct,
         // and therefore the extension will not load.

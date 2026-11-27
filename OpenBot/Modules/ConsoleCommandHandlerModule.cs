@@ -102,7 +102,7 @@ internal sealed class ConsoleCommandHandlerModule : Module
             }
             else if (consoleInput == "list extensions")
             {
-                Context.Modules.GetOrNull<IExtensionsManagerModule>()?.GetExtensions().ToList().ForEach(ext => Console.WriteLine($"{ext.Name,-15} [Version: {ext.Metadata.version}] [API Version: {ext.Metadata.apiVersion}] [Status: {ext.Status}]"));
+                Context.Extensions?.GetExtensions().ToList().ForEach(ext => Console.WriteLine($"{ext.Name,-15} [Version: {ext.Metadata.version}] [API Version: {ext.Metadata.apiVersion}] [Status: {ext.Status}]"));
                 Console.WriteLine("");
             }
             else if (consoleInput == "list modules")

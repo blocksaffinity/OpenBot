@@ -1,5 +1,6 @@
 using OpenBot.API.Enums;
 using OpenBot.API.Modules;
+using OpenBot.Events;
 
 namespace OpenBot.Modules;
 
@@ -8,10 +9,12 @@ internal sealed class ModuleManager : IModuleManager
     private readonly Dictionary<Type, Module> modules = [];
     private readonly Dictionary<Type, IModule> publicModules = [];
     private readonly Logger logger;
+    private readonly OpenBotEvents events;
 
-    internal ModuleManager()
+    internal ModuleManager(OpenBotEvents events)
     {
         logger = LoggingService.GetLogger("ModuleManager");
+        this.events = events;
     }
 
     /// <summary>
@@ -36,6 +39,7 @@ internal sealed class ModuleManager : IModuleManager
         try
         {
             await module.RegisterAsync();
+            events.RaiseModuleStarted(module);
         }
         catch (Exception ex)
         {

@@ -1,17 +1,19 @@
 ﻿using OpenBot.API;
+using OpenBot.Events;
 using OpenBot.Modules;
 
 Logger logger = LoggingService.GetLogger("Program");
-
-var moduleManager = new ModuleManager();
+OpenBotEvents events = new();
+ModuleManager moduleManager = new(events);
 
 var coreContext = new ModuleContext(
     "Core",
     LoggingService.GetLogger("Core"),
-    moduleManager
+    moduleManager,
+    events
 );
 
-Core core = new(moduleManager, coreContext);
+Core core = new(moduleManager, coreContext, events);
 
 try
 {

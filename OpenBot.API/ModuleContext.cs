@@ -1,4 +1,5 @@
 using OpenBot.API.Enums;
+using OpenBot.API.Events;
 using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
 
@@ -37,6 +38,18 @@ public class ModuleContext
     public IConfigurationModule? ConfigurationModule { get; set; }
 
     /// <summary>
+    /// [0.2.0-beta]<br/>
+    /// The globally registered IExtensionManagerModule module.
+    /// </summary>
+    public IExtensionsManagerModule? Extensions { get; set; }
+
+    /// <summary>
+    /// [0.2.0-beta]<br/>
+    /// The instance of the IOpenBotEvents
+    /// </summary>
+    public IOpenBotEvents Events { get; }
+
+    /// <summary>
     /// [0.1.0-beta]<br/>
     /// Retrieves the status of any desired module by name.
     /// </summary>
@@ -62,13 +75,16 @@ public class ModuleContext
     public ModuleContext(
         string name,
         ILogger logger,
-        IModuleManager modules)
+        IModuleManager modules,
+        IOpenBotEvents events)
     {
         Name = name;
         Logger = logger;
         Modules = modules;
+        Events = events;
 
         DiscordModule = Modules.GetOrNull<IDiscordModule>();
         ConfigurationModule = Modules.GetOrNull<IConfigurationModule>();
+        Extensions = Modules.GetOrNull<IExtensionsManagerModule>();
     }
 }

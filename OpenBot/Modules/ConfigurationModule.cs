@@ -4,6 +4,7 @@ using OpenBot.API;
 using OpenBot.Utils;
 using YamlDotNet.Core;
 using OpenBot.Exceptions;
+using OpenBot.API.Events;
 
 namespace OpenBot.Modules;
 
@@ -18,6 +19,8 @@ internal sealed class ConfigurationModule : Module, IConfigurationModule
     {
         serializer = new SerializerBuilder().Build();
         deserializer = new DeserializerBuilder().Build();
+
+        context.Events.ModuleStarted += Module_Started;
     }
 
     /// <summary>
@@ -174,5 +177,12 @@ internal sealed class ConfigurationModule : Module, IConfigurationModule
 
         configurationCache.Remove(moduleName);
         configurationCache.Add(moduleName, config);
+    }
+
+
+
+    public void Module_Started(object? sender, ModuleStartedEventArgs e)
+    {
+        Console.WriteLine($"\n\n\n{e.Name} just started\n\n\n.");
     }
 }

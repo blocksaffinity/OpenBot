@@ -1,16 +1,19 @@
 using OpenBot.API;
 using OpenBot.API.Extensions;
 using OpenBot.API.Modules;
+using OpenBot.Events;
 
 namespace OpenBot.Modules;
 
 internal class Core : Module
 {
     private readonly ModuleManager moduleManager;
+    private readonly OpenBotEvents events;
 
-    internal Core(ModuleManager moduleManager, ModuleContext ctx) : base(ctx)
+    internal Core(ModuleManager moduleManager, ModuleContext ctx, OpenBotEvents events) : base(ctx)
     {
         this.moduleManager = moduleManager;
+        this.events = events;
     }
 
     internal async Task RunAsync()
@@ -38,7 +41,8 @@ internal class Core : Module
             configContext = new ModuleContext(
                 "Configuration",
                 LoggingService.GetLogger("Configuration"),
-                moduleManager
+                moduleManager,
+                events
             );
             configurationModule = new ConfigurationModule(configContext);
             await moduleManager.Register(configurationModule);
@@ -47,7 +51,8 @@ internal class Core : Module
             authContext = new ModuleContext(
                 "Authentication",
                 LoggingService.GetLogger("Authentication"),
-                moduleManager
+                moduleManager,
+                events
             );
             authenticationModule = new AuthenticationModule(authContext);
             await moduleManager.Register(authenticationModule);
@@ -57,7 +62,8 @@ internal class Core : Module
             discordContext = new ModuleContext(
                 "Discord",
                 LoggingService.GetLogger("Discord"),
-                moduleManager
+                moduleManager,
+                events
             );
             discordModule = new DiscordModule(discordContext, authenticationModule);
             await moduleManager.Register(discordModule);
@@ -67,9 +73,10 @@ internal class Core : Module
             extensionsContext = new ModuleContext(
                 "Extensions",
                 LoggingService.GetLogger("Extensions"),
-                moduleManager
+                moduleManager,
+                events
             );
-            extensionsManagerModule = new ExtensionsManagerModule(extensionsContext);
+            extensionsManagerModule = new ExtensionsManagerModule(extensionsContext, events);
             await moduleManager.Register(extensionsManagerModule);
 
 
@@ -77,7 +84,8 @@ internal class Core : Module
             cchContext = new ModuleContext(
                 "CCommandHandler",
                 LoggingService.GetLogger("CCommandHandler"),
-                moduleManager
+                moduleManager,
+                events
             );
             consoleCommandHandlerModule = new ConsoleCommandHandlerModule(cchContext);
             await moduleManager.Register(consoleCommandHandlerModule);
@@ -135,7 +143,8 @@ internal class Core : Module
                         name    : extensionName,
                         logger  : logger,
                         modules : moduleManager,
-                        meta    : extensionMeta
+                        meta    : extensionMeta,
+                        events  : events
                     );
                     try
                     {
@@ -188,15 +197,16 @@ internal class Core : Module
             this.Logger.Warn("This version of the OpenBot API is a beta version. Expect bugs and instability.");
         }
 
+        events.RaiseBotStarted();
+
 
         // TODO: Implement a graceful shutdown
-        // Note: running `stop` is graceful
-        //await Task.Delay(Timeout.Infinite);
+        // Note: running `stop` is graceful, CTRL C is not
 
         await consoleCommandHandlerModule.CommandHandlerLoop();
 
         // Bot is now shutting down!
-
+        events.RaiseBotStopping();
         await extensionsManagerModule.StopAllExtensionsAsync();
         await moduleManager.StopAllModulesAsync();
     }
